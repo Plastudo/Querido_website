@@ -1,0 +1,19 @@
+{
+  "nav": {
+    "home": "Início",
+    "about": "Sobre",
+    "contact": "Contacto"
+  },
+  "home": {
+    "title": "Bem-vindo",
+    "subtitle": "Este é o teu novo projeto."
+  },
+  "about": {
+    "title": "Sobre",
+    "description": "Fica a conhecer-nos melhor."
+  },
+  "contact": {
+    "title": "Contacto",
+    "description": "Entra em contacto connosco."
+  }
+}
