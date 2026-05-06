@@ -1,0 +1,674 @@
+{
+  "workType": "bathroom",
+  "questions": [
+    {
+      "id": "bathroom_area",
+      "type": "number",
+      "label": "Qual é a área total da sua casa de banho, em m²? (Ex.: 2,5 m de comprimento × 2 m de largura = 5 m²)"
+    },
+    {
+      "id": "bathroom_state",
+      "type": "single_select",
+      "label": "Qual é o estado atual da casa de banho?",
+      "options": [
+        {
+          "value": "full_demolition",
+          "label": "Demolição completa — retirar tudo: azulejos, pavimento, louças e canalizações existentes"
+        },
+        {
+          "value": "partial_renovation",
+          "label": "Renovação parcial — retirar apenas alguns elementos e manter outros"
+        },
+        {
+          "value": "just_finishing",
+          "label": "Apenas acabamentos — novos azulejos por cima dos existentes ou pintura, sem demolir nada"
+        }
+      ]
+    },
+    {
+      "id": "demolition_area",
+      "type": "number",
+      "label": "Quantos m² precisam de demolição (azulejos, pavimento ou outros elementos a retirar)? Se não tem a certeza, use a área total da casa de banho.",
+      "conditions": [
+        { "questionId": "bathroom_state", "values": ["full_demolition", "partial_renovation"] }
+      ],
+      "generates": [
+        { "budgetItemId": "lab_demolition", "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "bathroom_floor",
+      "type": "single_select",
+      "label": "O que pretende fazer no pavimento da casa de banho?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter o pavimento atual"
+        },
+        {
+          "value": "new_ceramic",
+          "label": "Novo pavimento cerâmico — recomendado para casas de banho pela durabilidade e resistência à humidade"
+        }
+      ]
+    },
+    {
+      "id": "floor_ceramic_area",
+      "type": "number",
+      "label": "Quantos m² de pavimento cerâmico? (normalmente igual à área total da casa de banho; adicione 10% para desperdício)",
+      "conditions": [
+        { "questionId": "bathroom_floor", "values": ["new_ceramic"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_floor_ceramic_tile",  "mapping": "direct" },
+        { "budgetItemId": "mat_floor_tile_adhesive", "mapping": "direct" },
+        { "budgetItemId": "mat_floor_tile_grout",    "mapping": "direct" },
+        { "budgetItemId": "lab_floor_tiler",         "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "bathroom_walls",
+      "type": "single_select",
+      "label": "O que pretende fazer nas paredes da casa de banho?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter as paredes como estão"
+        },
+        {
+          "value": "full_tiles",
+          "label": "Azulejos novos do chão ao teto — cobertura total, máxima proteção contra humidade"
+        },
+        {
+          "value": "partial_tiles_paint",
+          "label": "Azulejos até meia parede + pintura acima — solução intermédia e mais económica"
+        }
+      ]
+    },
+    {
+      "id": "wall_full_tile_area",
+      "type": "number",
+      "label": "Quantos m² de azulejo para as paredes? (some: largura de cada parede × altura total, geralmente 2,4 m; adicione 10% para desperdício)",
+      "conditions": [
+        { "questionId": "bathroom_walls", "values": ["full_tiles"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_wall_tile",          "mapping": "direct" },
+        { "budgetItemId": "mat_wall_tile_adhesive", "mapping": "direct" },
+        { "budgetItemId": "mat_wall_tile_grout",    "mapping": "direct" },
+        { "budgetItemId": "lab_wall_tiler",         "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "wall_partial_tile_area",
+      "type": "number",
+      "label": "Quantos m² de azulejo para as paredes? (some: largura de cada parede × a altura até onde vai o azulejo, tipicamente 1,2 m; adicione 10%)",
+      "conditions": [
+        { "questionId": "bathroom_walls", "values": ["partial_tiles_paint"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_wall_tile",          "mapping": "direct" },
+        { "budgetItemId": "mat_wall_tile_adhesive", "mapping": "direct" },
+        { "budgetItemId": "mat_wall_tile_grout",    "mapping": "direct" },
+        { "budgetItemId": "lab_wall_tiler",         "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "wall_partial_paint_area",
+      "type": "number",
+      "label": "Quantos m² de parede vai pintar (a parte acima do azulejo)? (some: largura de cada parede × altura da zona a pintar)",
+      "conditions": [
+        { "questionId": "bathroom_walls", "values": ["partial_tiles_paint"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_wall_primer_bath", "mapping": "direct" },
+        { "budgetItemId": "mat_wall_paint_bath",  "mapping": "direct" },
+        { "budgetItemId": "lab_wall_painter",     "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "sanitary_scope",
+      "type": "single_select",
+      "label": "O que pretende fazer com as louças sanitárias (sanita, lavatório, duche/banheira)?",
+      "options": [
+        {
+          "value": "keep_all",
+          "label": "Manter tudo — as louças atuais ficam no lugar"
+        },
+        {
+          "value": "replace_all",
+          "label": "Substituir tudo — sanita, lavatório e duche/banheira novos"
+        },
+        {
+          "value": "replace_partially",
+          "label": "Substituir apenas algumas peças — escolho quais a seguir"
+        }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_toilet",
+          "mapping": "lookup",
+          "lookupTable": { "keep_all": 0, "replace_all": 1, "replace_partially": 0 }
+        },
+        {
+          "budgetItemId": "lab_sanitary_install_toilet",
+          "mapping": "lookup",
+          "lookupTable": { "keep_all": 0, "replace_all": 1, "replace_partially": 0 }
+        },
+        {
+          "budgetItemId": "mat_basin",
+          "mapping": "lookup",
+          "lookupTable": { "keep_all": 0, "replace_all": 1, "replace_partially": 0 }
+        },
+        {
+          "budgetItemId": "lab_sanitary_install_basin",
+          "mapping": "lookup",
+          "lookupTable": { "keep_all": 0, "replace_all": 1, "replace_partially": 0 }
+        }
+      ]
+    },
+    {
+      "id": "shower_bathtub_choice",
+      "type": "single_select",
+      "label": "Prefere duche ou banheira? (vai substituir toda a instalação)",
+      "conditions": [
+        { "questionId": "sanitary_scope", "values": ["replace_all"] }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_shower_tray",
+          "mapping": "lookup",
+          "lookupTable": { "shower_tray": 1, "bathtub": 0 }
+        },
+        {
+          "budgetItemId": "mat_bathtub",
+          "mapping": "lookup",
+          "lookupTable": { "shower_tray": 0, "bathtub": 1 }
+        },
+        {
+          "budgetItemId": "lab_sanitary_install_shower_bath",
+          "mapping": "lookup",
+          "lookupTable": { "shower_tray": 1, "bathtub": 1 }
+        }
+      ],
+      "options": [
+        {
+          "value": "shower_tray",
+          "label": "Duche — base de duche com estrutura e vidros, mais prático e acessível"
+        },
+        {
+          "value": "bathtub",
+          "label": "Banheira — mais confortável, ideal para famílias com crianças"
+        }
+      ]
+    },
+    {
+      "id": "replace_toilet",
+      "type": "single_select",
+      "label": "Pretende substituir a sanita?",
+      "conditions": [
+        { "questionId": "sanitary_scope", "values": ["replace_partially"] }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_toilet",
+          "mapping": "lookup",
+          "lookupTable": { "yes": 1, "no": 0 }
+        },
+        {
+          "budgetItemId": "lab_sanitary_install_toilet",
+          "mapping": "lookup",
+          "lookupTable": { "yes": 1, "no": 0 }
+        }
+      ],
+      "options": [
+        { "value": "yes", "label": "Sim, substituir a sanita" },
+        { "value": "no",  "label": "Não, manter a sanita atual" }
+      ]
+    },
+    {
+      "id": "replace_basin",
+      "type": "single_select",
+      "label": "Pretende substituir o lavatório?",
+      "conditions": [
+        { "questionId": "sanitary_scope", "values": ["replace_partially"] }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_basin",
+          "mapping": "lookup",
+          "lookupTable": { "yes": 1, "no": 0 }
+        },
+        {
+          "budgetItemId": "lab_sanitary_install_basin",
+          "mapping": "lookup",
+          "lookupTable": { "yes": 1, "no": 0 }
+        }
+      ],
+      "options": [
+        { "value": "yes", "label": "Sim, substituir o lavatório" },
+        { "value": "no",  "label": "Não, manter o lavatório atual" }
+      ]
+    },
+    {
+      "id": "replace_shower_or_bath",
+      "type": "single_select",
+      "label": "O que pretende fazer com o duche ou banheira?",
+      "conditions": [
+        { "questionId": "sanitary_scope", "values": ["replace_partially"] }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_shower_tray",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "shower_tray": 1, "bathtub": 0 }
+        },
+        {
+          "budgetItemId": "mat_bathtub",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "shower_tray": 0, "bathtub": 1 }
+        },
+        {
+          "budgetItemId": "lab_sanitary_install_shower_bath",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "shower_tray": 1, "bathtub": 1 }
+        }
+      ],
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter o duche / banheira atual"
+        },
+        {
+          "value": "shower_tray",
+          "label": "Novo duche — base de duche com estrutura e vidros"
+        },
+        {
+          "value": "bathtub",
+          "label": "Nova banheira"
+        }
+      ]
+    },
+    {
+      "id": "bathroom_plumbing",
+      "type": "single_select",
+      "label": "O que vai ser feito na canalização de água da casa de banho?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter a canalização atual — todas as louças ficam no mesmo sítio"
+        },
+        {
+          "value": "move_points",
+          "label": "Mudar alguns pontos de água — deslocar uma ou mais louças de sítio"
+        },
+        {
+          "value": "full_replumbing",
+          "label": "Canalização nova de raiz — tubagem de abastecimento e esgoto completamente nova"
+        }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_pvc_pipe",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "move_points": 3, "full_replumbing": 8 }
+        },
+        {
+          "budgetItemId": "mat_copper_pipe",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "move_points": 5, "full_replumbing": 12 }
+        },
+        {
+          "budgetItemId": "lab_plumbing_hours",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "move_points": 8, "full_replumbing": 20 }
+        }
+      ]
+    },
+    {
+      "id": "bathroom_electrical",
+      "type": "single_select",
+      "label": "O que vai ser feito na instalação elétrica da casa de banho?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter a instalação elétrica atual"
+        },
+        {
+          "value": "add_towel_rail",
+          "label": "Acrescentar toalheiro elétrico — mantendo a instalação existente"
+        },
+        {
+          "value": "full_rewiring",
+          "label": "Instalação elétrica nova de raiz — circuitos, caixas e pontos de luz todos novos"
+        }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_electrical_cable",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_towel_rail": 5, "full_rewiring": 30 }
+        },
+        {
+          "budgetItemId": "mat_electrical_box",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_towel_rail": 1, "full_rewiring": 5 }
+        },
+        {
+          "budgetItemId": "mat_switch_socket",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_towel_rail": 0, "full_rewiring": 4 }
+        },
+        {
+          "budgetItemId": "mat_towel_rail",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_towel_rail": 1, "full_rewiring": 0 }
+        },
+        {
+          "budgetItemId": "lab_electrical_hours",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_towel_rail": 3, "full_rewiring": 16 }
+        }
+      ]
+    },
+    {
+      "id": "bathroom_ventilation",
+      "type": "single_select",
+      "label": "Como está a ventilação da casa de banho?",
+      "options": [
+        {
+          "value": "existing",
+          "label": "Já tem ventilação suficiente — janela ou extrator existente em bom estado"
+        },
+        {
+          "value": "add_extractor",
+          "label": "Instalar extrator de ar novo — essencial para evitar humidade e bolor sem janela"
+        }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_extractor_fan",
+          "mapping": "lookup",
+          "lookupTable": { "existing": 0, "add_extractor": 1 }
+        },
+        {
+          "budgetItemId": "lab_electrical_hours",
+          "mapping": "lookup",
+          "lookupTable": { "existing": 0, "add_extractor": 2 }
+        }
+      ]
+    }
+  ],
+
+  "budgetItemTemplates": {
+
+    "lab_demolition": {
+      "category": "labor",
+      "name": "Demolição e remoção de entulho",
+      "unit": "m2",
+      "unitPrice": 12.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_floor_ceramic_tile": {
+      "category": "material",
+      "name": "Mosaico cerâmico — pavimento",
+      "unit": "m2",
+      "unitPrice": 20.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_floor_tile_adhesive": {
+      "category": "material",
+      "name": "Argamassa colante — pavimento (≈ 4,5 kg/m²)",
+      "unit": "m2",
+      "unitPrice": 3.38,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_floor_tile_grout": {
+      "category": "material",
+      "name": "Rejunte — pavimento (≈ 0,5 kg/m²)",
+      "unit": "m2",
+      "unitPrice": 1.10,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_floor_tiler": {
+      "category": "labor",
+      "name": "Assentamento de mosaico — pavimento",
+      "unit": "m2",
+      "unitPrice": 18.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_wall_tile": {
+      "category": "material",
+      "name": "Azulejo — paredes",
+      "unit": "m2",
+      "unitPrice": 22.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_wall_tile_adhesive": {
+      "category": "material",
+      "name": "Argamassa colante — paredes (≈ 4,5 kg/m²)",
+      "unit": "m2",
+      "unitPrice": 3.38,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_wall_tile_grout": {
+      "category": "material",
+      "name": "Rejunte — paredes (≈ 0,5 kg/m²)",
+      "unit": "m2",
+      "unitPrice": 1.10,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_wall_tiler": {
+      "category": "labor",
+      "name": "Assentamento de azulejo — paredes",
+      "unit": "m2",
+      "unitPrice": 18.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_wall_primer_bath": {
+      "category": "material",
+      "name": "Primário anti-humidade — paredes (≈ 0,25 L/m²)",
+      "unit": "m2",
+      "unitPrice": 1.05,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_wall_paint_bath": {
+      "category": "material",
+      "name": "Tinta lavável anti-humidade — paredes (2 demãos, ≈ 0,4 L/m²)",
+      "unit": "m2",
+      "unitPrice": 3.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_wall_painter": {
+      "category": "labor",
+      "name": "Pintura de paredes",
+      "unit": "m2",
+      "unitPrice": 8.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_toilet": {
+      "category": "material",
+      "name": "Sanita com autoclismo",
+      "unit": "un",
+      "unitPrice": 280.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_sanitary_install_toilet": {
+      "category": "labor",
+      "name": "Instalação de sanita (inclui ligações de esgoto e água)",
+      "unit": "un",
+      "unitPrice": 150.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_basin": {
+      "category": "material",
+      "name": "Lavatório com coluna ou suspenso",
+      "unit": "un",
+      "unitPrice": 180.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_sanitary_install_basin": {
+      "category": "labor",
+      "name": "Instalação de lavatório (inclui torneira e sifão)",
+      "unit": "un",
+      "unitPrice": 120.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_shower_tray": {
+      "category": "material",
+      "name": "Base de duche com estrutura e painéis de vidro",
+      "unit": "un",
+      "unitPrice": 450.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_bathtub": {
+      "category": "material",
+      "name": "Banheira",
+      "unit": "un",
+      "unitPrice": 500.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_sanitary_install_shower_bath": {
+      "category": "labor",
+      "name": "Instalação de base de duche / banheira",
+      "unit": "un",
+      "unitPrice": 250.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_pvc_pipe": {
+      "category": "material",
+      "name": "Tubo PVC 50mm — esgotos",
+      "unit": "ml",
+      "unitPrice": 3.20,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_copper_pipe": {
+      "category": "material",
+      "name": "Tubo de cobre 15mm — abastecimento",
+      "unit": "ml",
+      "unitPrice": 6.50,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_plumbing_hours": {
+      "category": "labor",
+      "name": "Trabalho de canalizador",
+      "unit": "hr",
+      "unitPrice": 35.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_electrical_cable": {
+      "category": "material",
+      "name": "Cabo elétrico 2,5 mm²",
+      "unit": "ml",
+      "unitPrice": 1.10,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_electrical_box": {
+      "category": "material",
+      "name": "Caixa de derivação",
+      "unit": "un",
+      "unitPrice": 8.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_switch_socket": {
+      "category": "material",
+      "name": "Tomada / interruptor",
+      "unit": "un",
+      "unitPrice": 6.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_towel_rail": {
+      "category": "material",
+      "name": "Toalheiro elétrico",
+      "unit": "un",
+      "unitPrice": 180.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_electrical_hours": {
+      "category": "labor",
+      "name": "Trabalho de eletricista",
+      "unit": "hr",
+      "unitPrice": 35.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_extractor_fan": {
+      "category": "material",
+      "name": "Extrator de ar para casa de banho",
+      "unit": "un",
+      "unitPrice": 85.00,
+      "editableFields": ["quantity", "unitPrice"]
+    }
+  },
+
+  "sections": [
+    {
+      "title": "Demolição",
+      "itemIds": ["lab_demolition"]
+    },
+    {
+      "title": "Pavimento",
+      "itemIds": [
+        "mat_floor_ceramic_tile",
+        "mat_floor_tile_adhesive",
+        "mat_floor_tile_grout",
+        "lab_floor_tiler"
+      ]
+    },
+    {
+      "title": "Paredes",
+      "itemIds": [
+        "mat_wall_tile",
+        "mat_wall_tile_adhesive",
+        "mat_wall_tile_grout",
+        "lab_wall_tiler",
+        "mat_wall_primer_bath",
+        "mat_wall_paint_bath",
+        "lab_wall_painter"
+      ]
+    },
+    {
+      "title": "Louças Sanitárias",
+      "itemIds": [
+        "mat_toilet",
+        "lab_sanitary_install_toilet",
+        "mat_basin",
+        "lab_sanitary_install_basin",
+        "mat_shower_tray",
+        "mat_bathtub",
+        "lab_sanitary_install_shower_bath"
+      ]
+    },
+    {
+      "title": "Canalização",
+      "itemIds": [
+        "mat_pvc_pipe",
+        "mat_copper_pipe",
+        "lab_plumbing_hours"
+      ]
+    },
+    {
+      "title": "Instalação Elétrica",
+      "itemIds": [
+        "mat_electrical_cable",
+        "mat_electrical_box",
+        "mat_switch_socket",
+        "mat_towel_rail",
+        "lab_electrical_hours"
+      ]
+    },
+    {
+      "title": "Ventilação",
+      "itemIds": [
+        "mat_extractor_fan"
+      ]
+    }
+  ]
+}

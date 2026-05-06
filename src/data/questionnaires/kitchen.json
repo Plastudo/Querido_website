@@ -1,0 +1,622 @@
+{
+  "workType": "kitchen",
+  "questions": [
+    {
+      "id": "kitchen_area",
+      "type": "number",
+      "label": "Qual é a área total da sua cozinha, em m²? (Ex.: uma cozinha de 4 m de comprimento × 3 m de largura = 12 m²)"
+    },
+    {
+      "id": "kitchen_state",
+      "type": "single_select",
+      "label": "Qual é o estado atual da cozinha?",
+      "options": [
+        {
+          "value": "full_demolition",
+          "label": "Demolição completa — retirar tudo: azulejos, pavimento, armários e canalizações existentes"
+        },
+        {
+          "value": "partial_renovation",
+          "label": "Renovação parcial — retirar apenas alguns elementos e manter outros"
+        },
+        {
+          "value": "just_finishing",
+          "label": "Apenas acabamentos — pintura, novos azulejos por cima, sem demolir nada"
+        }
+      ]
+    },
+    {
+      "id": "demolition_area",
+      "type": "number",
+      "label": "Quantos m² precisam de demolição (azulejos, pavimento ou outros elementos a retirar)? Se não tem a certeza, use a área total da cozinha.",
+      "conditions": [
+        { "questionId": "kitchen_state", "values": ["full_demolition", "partial_renovation"] }
+      ],
+      "generates": [
+        { "budgetItemId": "lab_demolition", "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "kitchen_floor",
+      "type": "single_select",
+      "label": "O que pretende fazer no pavimento da cozinha?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter o pavimento atual"
+        },
+        {
+          "value": "new_ceramic",
+          "label": "Novo pavimento cerâmico — mosaico ou porcelânico, durável e fácil de limpar"
+        },
+        {
+          "value": "new_vinyl",
+          "label": "Novo pavimento vinílico — mais económico, confortável e rápido de aplicar"
+        }
+      ]
+    },
+    {
+      "id": "floor_ceramic_area",
+      "type": "number",
+      "label": "Quantos m² de pavimento cerâmico? (normalmente igual à área total da cozinha; adicione 10% para desperdício)",
+      "conditions": [
+        { "questionId": "kitchen_floor", "values": ["new_ceramic"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_floor_ceramic_tile",  "mapping": "direct" },
+        { "budgetItemId": "mat_floor_tile_adhesive", "mapping": "direct" },
+        { "budgetItemId": "mat_floor_tile_grout",    "mapping": "direct" },
+        { "budgetItemId": "lab_floor_tiler",         "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "floor_vinyl_area",
+      "type": "number",
+      "label": "Quantos m² de pavimento vinílico? (normalmente igual à área total da cozinha; adicione 5% para desperdício)",
+      "conditions": [
+        { "questionId": "kitchen_floor", "values": ["new_vinyl"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_floor_vinyl",          "mapping": "direct" },
+        { "budgetItemId": "lab_floor_vinyl_installer", "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "kitchen_walls",
+      "type": "single_select",
+      "label": "O que pretende fazer nas paredes da cozinha?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter as paredes como estão"
+        },
+        {
+          "value": "new_tiles",
+          "label": "Novos azulejos nas paredes — proteção total contra humidade e gordura"
+        },
+        {
+          "value": "paint_only",
+          "label": "Pintar as paredes — opção mais rápida e económica"
+        }
+      ]
+    },
+    {
+      "id": "wall_tile_area",
+      "type": "number",
+      "label": "Quantos m² de azulejo para as paredes? (meça: largura de cada parede × altura a azulejar, geralmente entre 60 cm e 2,4 m)",
+      "conditions": [
+        { "questionId": "kitchen_walls", "values": ["new_tiles"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_wall_tile",         "mapping": "direct" },
+        { "budgetItemId": "mat_wall_tile_adhesive", "mapping": "direct" },
+        { "budgetItemId": "mat_wall_tile_grout",    "mapping": "direct" },
+        { "budgetItemId": "lab_wall_tiler",         "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "wall_paint_area",
+      "type": "number",
+      "label": "Quantos m² de parede vai pintar? (some as áreas de cada parede: largura × altura de cada uma)",
+      "conditions": [
+        { "questionId": "kitchen_walls", "values": ["paint_only"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_wall_primer",  "mapping": "direct" },
+        { "budgetItemId": "mat_wall_paint",   "mapping": "direct" },
+        { "budgetItemId": "lab_wall_painter", "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "kitchen_ceiling",
+      "type": "single_select",
+      "label": "O que pretende fazer no teto da cozinha?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter o teto como está"
+        },
+        {
+          "value": "paint",
+          "label": "Pintar o teto — renovação simples e económica"
+        },
+        {
+          "value": "new_false_ceiling",
+          "label": "Teto falso em pladur — esconde canalizações e dá acabamento moderno"
+        }
+      ]
+    },
+    {
+      "id": "ceiling_paint_area",
+      "type": "number",
+      "label": "Quantos m² de teto vai pintar? (normalmente igual à área total da cozinha)",
+      "conditions": [
+        { "questionId": "kitchen_ceiling", "values": ["paint"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_ceiling_primer",  "mapping": "direct" },
+        { "budgetItemId": "mat_ceiling_paint",   "mapping": "direct" },
+        { "budgetItemId": "lab_ceiling_painter", "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "ceiling_false_area",
+      "type": "number",
+      "label": "Quantos m² de teto falso (pladur)? (normalmente igual à área total da cozinha)",
+      "conditions": [
+        { "questionId": "kitchen_ceiling", "values": ["new_false_ceiling"] }
+      ],
+      "generates": [
+        { "budgetItemId": "mat_ceiling_plasterboard", "mapping": "direct" },
+        { "budgetItemId": "lab_ceiling_plasterer",    "mapping": "direct" }
+      ]
+    },
+    {
+      "id": "kitchen_plumbing",
+      "type": "single_select",
+      "label": "O que vai ser feito na canalização de água da cozinha?",
+      "options": [
+        {
+          "value": "keep_existing",
+          "label": "Manter a canalização atual — a pia fica no mesmo sítio, sem alterar tubagens"
+        },
+        {
+          "value": "move_sink",
+          "label": "Mudar o ponto de água — mover a pia ou acrescentar uma torneira noutra posição"
+        },
+        {
+          "value": "full_replumbing",
+          "label": "Canalização nova de raiz — tubagem de abastecimento e esgoto completamente nova"
+        }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_pvc_pipe",
+          "mapping": "lookup",
+          "lookupTable": { "keep_existing": 0, "move_sink": 3, "full_replumbing": 10 }
+        },
+        {
+          "budgetItemId": "mat_copper_pipe",
+          "mapping": "lookup",
+          "lookupTable": { "keep_existing": 0, "move_sink": 5, "full_replumbing": 15 }
+        },
+        {
+          "budgetItemId": "lab_plumbing_hours",
+          "mapping": "lookup",
+          "lookupTable": { "keep_existing": 0, "move_sink": 8, "full_replumbing": 24 }
+        }
+      ]
+    },
+    {
+      "id": "kitchen_electrical",
+      "type": "single_select",
+      "label": "O que vai ser feito na instalação elétrica da cozinha?",
+      "options": [
+        {
+          "value": "keep",
+          "label": "Manter a instalação elétrica atual — tomadas e pontos de luz ficam iguais"
+        },
+        {
+          "value": "add_sockets",
+          "label": "Acrescentar tomadas e pontos de luz — mantendo a instalação existente"
+        },
+        {
+          "value": "full_rewiring",
+          "label": "Instalação elétrica nova de raiz — circuitos, caixas e tomadas todos novos"
+        }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_electrical_cable",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_sockets": 15, "full_rewiring": 40 }
+        },
+        {
+          "budgetItemId": "mat_electrical_box",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_sockets": 2, "full_rewiring": 6 }
+        },
+        {
+          "budgetItemId": "mat_switch_socket",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_sockets": 4, "full_rewiring": 10 }
+        },
+        {
+          "budgetItemId": "lab_electrical_hours",
+          "mapping": "lookup",
+          "lookupTable": { "keep": 0, "add_sockets": 8, "full_rewiring": 24 }
+        }
+      ]
+    },
+    {
+      "id": "kitchen_furniture",
+      "type": "single_select",
+      "label": "Pretende incluir mobiliário de cozinha no orçamento?",
+      "options": [
+        {
+          "value": "not_included",
+          "label": "Não incluir — já tenho móveis ou vejo mais tarde"
+        },
+        {
+          "value": "ikea_type",
+          "label": "Móveis de linha (tipo IKEA ou Leroy Merlin) — mais económico, gama variada, montagem simples"
+        },
+        {
+          "value": "custom_carpentry",
+          "label": "Marcenaria à medida — feito para o seu espaço exato, acabamento superior e mais durável"
+        }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_furniture_ikea",
+          "mapping": "lookup",
+          "lookupTable": { "not_included": 0, "ikea_type": 1, "custom_carpentry": 0 }
+        },
+        {
+          "budgetItemId": "mat_furniture_custom",
+          "mapping": "lookup",
+          "lookupTable": { "not_included": 0, "ikea_type": 0, "custom_carpentry": 1 }
+        },
+        {
+          "budgetItemId": "lab_carpenter_hours",
+          "mapping": "lookup",
+          "lookupTable": { "not_included": 0, "ikea_type": 8, "custom_carpentry": 40 }
+        }
+      ]
+    },
+    {
+      "id": "kitchen_appliances",
+      "type": "single_select",
+      "label": "Pretende incluir eletrodomésticos no orçamento?",
+      "options": [
+        {
+          "value": "not_included",
+          "label": "Não incluir — já tenho ou compro separado"
+        },
+        {
+          "value": "basic",
+          "label": "Gama básica — fogão, exaustor, frigorífico e máquina de lavar louça de entrada de gama"
+        },
+        {
+          "value": "premium",
+          "label": "Gama premium — eletrodomésticos de topo, maior eficiência energética e melhor acabamento"
+        }
+      ],
+      "generates": [
+        {
+          "budgetItemId": "mat_appliances_basic",
+          "mapping": "lookup",
+          "lookupTable": { "not_included": 0, "basic": 1, "premium": 0 }
+        },
+        {
+          "budgetItemId": "mat_appliances_premium",
+          "mapping": "lookup",
+          "lookupTable": { "not_included": 0, "basic": 0, "premium": 1 }
+        }
+      ]
+    }
+  ],
+
+  "budgetItemTemplates": {
+
+    "lab_demolition": {
+      "category": "labor",
+      "name": "Demolição e remoção de entulho",
+      "unit": "m2",
+      "unitPrice": 12.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_floor_ceramic_tile": {
+      "category": "material",
+      "name": "Mosaico cerâmico — pavimento",
+      "unit": "m2",
+      "unitPrice": 20.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_floor_tile_adhesive": {
+      "category": "material",
+      "name": "Argamassa colante — pavimento (≈ 4,5 kg/m²)",
+      "unit": "m2",
+      "unitPrice": 3.38,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_floor_tile_grout": {
+      "category": "material",
+      "name": "Rejunte — pavimento (≈ 0,5 kg/m²)",
+      "unit": "m2",
+      "unitPrice": 1.10,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_floor_tiler": {
+      "category": "labor",
+      "name": "Assentamento de mosaico — pavimento",
+      "unit": "m2",
+      "unitPrice": 18.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_floor_vinyl": {
+      "category": "material",
+      "name": "Pavimento vinílico",
+      "unit": "m2",
+      "unitPrice": 18.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_floor_vinyl_installer": {
+      "category": "labor",
+      "name": "Aplicação de pavimento vinílico",
+      "unit": "m2",
+      "unitPrice": 14.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_wall_tile": {
+      "category": "material",
+      "name": "Azulejo — paredes",
+      "unit": "m2",
+      "unitPrice": 22.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_wall_tile_adhesive": {
+      "category": "material",
+      "name": "Argamassa colante — paredes (≈ 4,5 kg/m²)",
+      "unit": "m2",
+      "unitPrice": 3.38,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_wall_tile_grout": {
+      "category": "material",
+      "name": "Rejunte — paredes (≈ 0,5 kg/m²)",
+      "unit": "m2",
+      "unitPrice": 1.10,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_wall_tiler": {
+      "category": "labor",
+      "name": "Assentamento de azulejo — paredes",
+      "unit": "m2",
+      "unitPrice": 18.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_wall_primer": {
+      "category": "material",
+      "name": "Primário — paredes (≈ 0,25 L/m²)",
+      "unit": "m2",
+      "unitPrice": 0.88,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_wall_paint": {
+      "category": "material",
+      "name": "Tinta interior — paredes (2 demãos, ≈ 0,4 L/m²)",
+      "unit": "m2",
+      "unitPrice": 2.20,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_wall_painter": {
+      "category": "labor",
+      "name": "Pintura de paredes",
+      "unit": "m2",
+      "unitPrice": 8.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_ceiling_primer": {
+      "category": "material",
+      "name": "Primário — teto (≈ 0,25 L/m²)",
+      "unit": "m2",
+      "unitPrice": 0.88,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_ceiling_paint": {
+      "category": "material",
+      "name": "Tinta — teto (2 demãos, ≈ 0,4 L/m²)",
+      "unit": "m2",
+      "unitPrice": 2.20,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_ceiling_painter": {
+      "category": "labor",
+      "name": "Pintura de teto",
+      "unit": "m2",
+      "unitPrice": 8.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_ceiling_plasterboard": {
+      "category": "material",
+      "name": "Pladur / teto falso — material e estrutura",
+      "unit": "m2",
+      "unitPrice": 12.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_ceiling_plasterer": {
+      "category": "labor",
+      "name": "Instalação de teto falso",
+      "unit": "m2",
+      "unitPrice": 13.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_pvc_pipe": {
+      "category": "material",
+      "name": "Tubo PVC 50mm — esgotos",
+      "unit": "ml",
+      "unitPrice": 3.20,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_copper_pipe": {
+      "category": "material",
+      "name": "Tubo de cobre 15mm — abastecimento",
+      "unit": "ml",
+      "unitPrice": 6.50,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_plumbing_hours": {
+      "category": "labor",
+      "name": "Trabalho de canalizador",
+      "unit": "hr",
+      "unitPrice": 35.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_electrical_cable": {
+      "category": "material",
+      "name": "Cabo elétrico 2,5 mm²",
+      "unit": "ml",
+      "unitPrice": 1.10,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_electrical_box": {
+      "category": "material",
+      "name": "Caixa de derivação",
+      "unit": "un",
+      "unitPrice": 8.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_switch_socket": {
+      "category": "material",
+      "name": "Tomada / interruptor",
+      "unit": "un",
+      "unitPrice": 6.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_electrical_hours": {
+      "category": "labor",
+      "name": "Trabalho de eletricista",
+      "unit": "hr",
+      "unitPrice": 35.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_furniture_ikea": {
+      "category": "material",
+      "name": "Móveis de cozinha de linha (tipo IKEA / Leroy Merlin)",
+      "unit": "vb",
+      "unitPrice": 3500.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_furniture_custom": {
+      "category": "material",
+      "name": "Marcenaria de cozinha à medida",
+      "unit": "vb",
+      "unitPrice": 8000.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "lab_carpenter_hours": {
+      "category": "labor",
+      "name": "Trabalho de marceneiro / montagem de móveis",
+      "unit": "hr",
+      "unitPrice": 30.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+
+    "mat_appliances_basic": {
+      "category": "material",
+      "name": "Eletrodomésticos — gama básica (fogão, exaustor, frigorífico, lava-louça)",
+      "unit": "vb",
+      "unitPrice": 1500.00,
+      "editableFields": ["quantity", "unitPrice"]
+    },
+    "mat_appliances_premium": {
+      "category": "material",
+      "name": "Eletrodomésticos — gama premium",
+      "unit": "vb",
+      "unitPrice": 4000.00,
+      "editableFields": ["quantity", "unitPrice"]
+    }
+  },
+
+  "sections": [
+    {
+      "title": "Demolição",
+      "itemIds": ["lab_demolition"]
+    },
+    {
+      "title": "Pavimento",
+      "itemIds": [
+        "mat_floor_ceramic_tile",
+        "mat_floor_tile_adhesive",
+        "mat_floor_tile_grout",
+        "lab_floor_tiler",
+        "mat_floor_vinyl",
+        "lab_floor_vinyl_installer"
+      ]
+    },
+    {
+      "title": "Paredes",
+      "itemIds": [
+        "mat_wall_tile",
+        "mat_wall_tile_adhesive",
+        "mat_wall_tile_grout",
+        "lab_wall_tiler",
+        "mat_wall_primer",
+        "mat_wall_paint",
+        "lab_wall_painter"
+      ]
+    },
+    {
+      "title": "Teto",
+      "itemIds": [
+        "mat_ceiling_primer",
+        "mat_ceiling_paint",
+        "lab_ceiling_painter",
+        "mat_ceiling_plasterboard",
+        "lab_ceiling_plasterer"
+      ]
+    },
+    {
+      "title": "Canalização",
+      "itemIds": [
+        "mat_pvc_pipe",
+        "mat_copper_pipe",
+        "lab_plumbing_hours"
+      ]
+    },
+    {
+      "title": "Instalação Elétrica",
+      "itemIds": [
+        "mat_electrical_cable",
+        "mat_electrical_box",
+        "mat_switch_socket",
+        "lab_electrical_hours"
+      ]
+    },
+    {
+      "title": "Mobiliário",
+      "itemIds": [
+        "mat_furniture_ikea",
+        "mat_furniture_custom",
+        "lab_carpenter_hours"
+      ]
+    },
+    {
+      "title": "Eletrodomésticos",
+      "itemIds": [
+        "mat_appliances_basic",
+        "mat_appliances_premium"
+      ]
+    }
+  ]
+}
