@@ -23,6 +23,7 @@ export type RegionalPrices = Record<Region, PriceEntry>;
 export interface QuestionOption {
   value: string;
   label: string;
+  description?: string;
 }
 
 /** Show this question only when the condition is met */
@@ -47,6 +48,7 @@ export interface Question {
   id: string;
   type: QuestionType;
   label: string;
+  hint?: string;
   options?: QuestionOption[];        // required for single_select / multi_select
   conditions?: QuestionCondition[];  // if absent, always shown
   generates?: BudgetItemGenerator[]; // budget items this question drives
@@ -84,4 +86,17 @@ export interface BudgetSection {
 export interface Budget {
   sections: BudgetSection[];
   totalPrice: number;
+}
+
+// ─── Multi-division project ───────────────────────────────────────────────────
+
+export interface ProjectDivision {
+  workType: string;
+  label: string;
+  budget: Budget;
+}
+
+export interface Project {
+  region: Region;
+  divisions: ProjectDivision[];
 }

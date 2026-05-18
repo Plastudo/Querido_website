@@ -133,6 +133,8 @@ export interface UseQuestionnaireReturn {
   answers: Answers;
   /** 0–100 */
   progress: number;
+  currentStep: number;
+  totalSteps: number;
   goNext: (answer: string | string[] | number) => void;
   goBack: () => void;
   isComplete: boolean;
@@ -196,6 +198,8 @@ export function useQuestionnaire(workType: string): UseQuestionnaireReturn {
     currentQuestion,
     answers,
     progress,
+    currentStep: currentIndex + 1,
+    totalSteps: visibleQuestions.length,
     goNext,
     goBack,
     isComplete,

@@ -4,31 +4,37 @@
     {
       "id": "bathroom_area",
       "type": "number",
-      "label": "Qual é a área total da sua casa de banho, em m²? (Ex.: 2,5 m de comprimento × 2 m de largura = 5 m²)"
+      "label": "Qual é a área total da sua casa de banho, em m²?",
+      "hint": "Use comprimento × largura. Exemplo: 2,5 m × 2 m = 5 m²"
     },
     {
       "id": "bathroom_state",
       "type": "single_select",
       "label": "Qual é o estado atual da casa de banho?",
+      "hint": "Escolha a opção que melhor descreve a situação. Pode sempre ajustar depois.",
       "options": [
         {
           "value": "full_demolition",
-          "label": "Demolição completa — retirar tudo: azulejos, pavimento, louças e canalizações existentes"
+          "label": "Demolição completa",
+          "description": "Retirar tudo: azulejos, pavimento, louças e canalizações existentes"
         },
         {
           "value": "partial_renovation",
-          "label": "Renovação parcial — retirar apenas alguns elementos e manter outros"
+          "label": "Renovação parcial",
+          "description": "Retirar apenas alguns elementos e manter outros"
         },
         {
           "value": "just_finishing",
-          "label": "Apenas acabamentos — novos azulejos por cima dos existentes ou pintura, sem demolir nada"
+          "label": "Apenas acabamentos",
+          "description": "Novos azulejos por cima dos existentes ou pintura, sem demolir nada"
         }
       ]
     },
     {
       "id": "demolition_area",
       "type": "number",
-      "label": "Quantos m² precisam de demolição (azulejos, pavimento ou outros elementos a retirar)? Se não tem a certeza, use a área total da casa de banho.",
+      "label": "Quantos m² precisam de demolição?",
+      "hint": "Inclua azulejos, pavimento e outros elementos a retirar. Se não tem a certeza, use a área total da casa de banho.",
       "conditions": [
         { "questionId": "bathroom_state", "values": ["full_demolition", "partial_renovation"] }
       ],
@@ -39,22 +45,26 @@
     {
       "id": "bathroom_floor",
       "type": "single_select",
-      "label": "O que pretende fazer no pavimento da casa de banho?",
+      "label": "O que pretende fazer no pavimento?",
+      "hint": "O pavimento cerâmico é o mais recomendado para casas de banho pela durabilidade.",
       "options": [
         {
           "value": "keep",
-          "label": "Manter o pavimento atual"
+          "label": "Manter o pavimento atual",
+          "description": "Sem obras no chão"
         },
         {
           "value": "new_ceramic",
-          "label": "Novo pavimento cerâmico — recomendado para casas de banho pela durabilidade e resistência à humidade"
+          "label": "Novo pavimento cerâmico",
+          "description": "Durável e resistente à humidade, ideal para casas de banho"
         }
       ]
     },
     {
       "id": "floor_ceramic_area",
       "type": "number",
-      "label": "Quantos m² de pavimento cerâmico? (normalmente igual à área total da casa de banho; adicione 10% para desperdício)",
+      "label": "Quantos m² de pavimento cerâmico?",
+      "hint": "Normalmente igual à área total da casa de banho. Adicione 10% para compensar o desperdício.",
       "conditions": [
         { "questionId": "bathroom_floor", "values": ["new_ceramic"] }
       ],
@@ -68,26 +78,31 @@
     {
       "id": "bathroom_walls",
       "type": "single_select",
-      "label": "O que pretende fazer nas paredes da casa de banho?",
+      "label": "O que pretende fazer nas paredes?",
+      "hint": "A cobertura total oferece máxima proteção em zonas de duche e banheira.",
       "options": [
         {
           "value": "keep",
-          "label": "Manter as paredes como estão"
+          "label": "Manter as paredes",
+          "description": "Sem alterações nas paredes"
         },
         {
           "value": "full_tiles",
-          "label": "Azulejos novos do chão ao teto — cobertura total, máxima proteção contra humidade"
+          "label": "Azulejos do chão ao teto",
+          "description": "Cobertura total, máxima proteção contra humidade"
         },
         {
           "value": "partial_tiles_paint",
-          "label": "Azulejos até meia parede + pintura acima — solução intermédia e mais económica"
+          "label": "Azulejos até meia parede + pintura",
+          "description": "Solução intermédia e mais económica"
         }
       ]
     },
     {
       "id": "wall_full_tile_area",
       "type": "number",
-      "label": "Quantos m² de azulejo para as paredes? (some: largura de cada parede × altura total, geralmente 2,4 m; adicione 10% para desperdício)",
+      "label": "Quantos m² de azulejo para as paredes?",
+      "hint": "Some: largura de cada parede × altura total (tipicamente 2,4 m). Adicione 10% para desperdício.",
       "conditions": [
         { "questionId": "bathroom_walls", "values": ["full_tiles"] }
       ],
@@ -101,7 +116,8 @@
     {
       "id": "wall_partial_tile_area",
       "type": "number",
-      "label": "Quantos m² de azulejo para as paredes? (some: largura de cada parede × a altura até onde vai o azulejo, tipicamente 1,2 m; adicione 10%)",
+      "label": "Quantos m² de azulejo (zona inferior)?",
+      "hint": "Some: largura de cada parede × a altura até onde vai o azulejo (tipicamente 1,2 m). Adicione 10%.",
       "conditions": [
         { "questionId": "bathroom_walls", "values": ["partial_tiles_paint"] }
       ],
@@ -115,7 +131,8 @@
     {
       "id": "wall_partial_paint_area",
       "type": "number",
-      "label": "Quantos m² de parede vai pintar (a parte acima do azulejo)? (some: largura de cada parede × altura da zona a pintar)",
+      "label": "Quantos m² de parede vai pintar (zona superior)?",
+      "hint": "Some: largura de cada parede × altura da zona a pintar.",
       "conditions": [
         { "questionId": "bathroom_walls", "values": ["partial_tiles_paint"] }
       ],
@@ -128,19 +145,23 @@
     {
       "id": "sanitary_scope",
       "type": "single_select",
-      "label": "O que pretende fazer com as louças sanitárias (sanita, lavatório, duche/banheira)?",
+      "label": "O que pretende fazer com as louças sanitárias?",
+      "hint": "Inclui sanita, lavatório, duche e banheira.",
       "options": [
         {
           "value": "keep_all",
-          "label": "Manter tudo — as louças atuais ficam no lugar"
+          "label": "Manter tudo",
+          "description": "As louças atuais ficam no lugar"
         },
         {
           "value": "replace_all",
-          "label": "Substituir tudo — sanita, lavatório e duche/banheira novos"
+          "label": "Substituir tudo",
+          "description": "Sanita, lavatório e duche/banheira novos"
         },
         {
           "value": "replace_partially",
-          "label": "Substituir apenas algumas peças — escolho quais a seguir"
+          "label": "Substituir algumas peças",
+          "description": "Escolho quais a substituir nas próximas perguntas"
         }
       ],
       "generates": [
@@ -169,7 +190,8 @@
     {
       "id": "shower_bathtub_choice",
       "type": "single_select",
-      "label": "Prefere duche ou banheira? (vai substituir toda a instalação)",
+      "label": "Prefere duche ou banheira?",
+      "hint": "Vai substituir toda a instalação de duche/banheira existente.",
       "conditions": [
         { "questionId": "sanitary_scope", "values": ["replace_all"] }
       ],
@@ -193,11 +215,13 @@
       "options": [
         {
           "value": "shower_tray",
-          "label": "Duche — base de duche com estrutura e vidros, mais prático e acessível"
+          "label": "Duche",
+          "description": "Base de duche com estrutura e vidros, mais prático e acessível"
         },
         {
           "value": "bathtub",
-          "label": "Banheira — mais confortável, ideal para famílias com crianças"
+          "label": "Banheira",
+          "description": "Mais confortável, ideal para famílias com crianças"
         }
       ]
     },
@@ -205,6 +229,10 @@
       "id": "replace_toilet",
       "type": "single_select",
       "label": "Pretende substituir a sanita?",
+      "options": [
+        { "value": "yes", "label": "Sim, substituir a sanita" },
+        { "value": "no",  "label": "Não, manter a sanita atual" }
+      ],
       "conditions": [
         { "questionId": "sanitary_scope", "values": ["replace_partially"] }
       ],
@@ -219,16 +247,16 @@
           "mapping": "lookup",
           "lookupTable": { "yes": 1, "no": 0 }
         }
-      ],
-      "options": [
-        { "value": "yes", "label": "Sim, substituir a sanita" },
-        { "value": "no",  "label": "Não, manter a sanita atual" }
       ]
     },
     {
       "id": "replace_basin",
       "type": "single_select",
       "label": "Pretende substituir o lavatório?",
+      "options": [
+        { "value": "yes", "label": "Sim, substituir o lavatório" },
+        { "value": "no",  "label": "Não, manter o lavatório atual" }
+      ],
       "conditions": [
         { "questionId": "sanitary_scope", "values": ["replace_partially"] }
       ],
@@ -243,10 +271,6 @@
           "mapping": "lookup",
           "lookupTable": { "yes": 1, "no": 0 }
         }
-      ],
-      "options": [
-        { "value": "yes", "label": "Sim, substituir o lavatório" },
-        { "value": "no",  "label": "Não, manter o lavatório atual" }
       ]
     },
     {
@@ -276,34 +300,41 @@
       "options": [
         {
           "value": "keep",
-          "label": "Manter o duche / banheira atual"
+          "label": "Manter o duche / banheira",
+          "description": "Sem alterações"
         },
         {
           "value": "shower_tray",
-          "label": "Novo duche — base de duche com estrutura e vidros"
+          "label": "Novo duche",
+          "description": "Base de duche com estrutura e vidros"
         },
         {
           "value": "bathtub",
-          "label": "Nova banheira"
+          "label": "Nova banheira",
+          "description": "Mais confortável para toda a família"
         }
       ]
     },
     {
       "id": "bathroom_plumbing",
       "type": "single_select",
-      "label": "O que vai ser feito na canalização de água da casa de banho?",
+      "label": "O que vai ser feito na canalização de água?",
+      "hint": "Mover louças de sítio implica obras de canalização adicionais.",
       "options": [
         {
           "value": "keep",
-          "label": "Manter a canalização atual — todas as louças ficam no mesmo sítio"
+          "label": "Manter a canalização",
+          "description": "Todas as louças ficam no mesmo sítio"
         },
         {
           "value": "move_points",
-          "label": "Mudar alguns pontos de água — deslocar uma ou mais louças de sítio"
+          "label": "Mudar alguns pontos de água",
+          "description": "Deslocar uma ou mais louças de sítio"
         },
         {
           "value": "full_replumbing",
-          "label": "Canalização nova de raiz — tubagem de abastecimento e esgoto completamente nova"
+          "label": "Canalização nova de raiz",
+          "description": "Tubagem de abastecimento e esgoto completamente nova"
         }
       ],
       "generates": [
@@ -327,19 +358,23 @@
     {
       "id": "bathroom_electrical",
       "type": "single_select",
-      "label": "O que vai ser feito na instalação elétrica da casa de banho?",
+      "label": "O que vai ser feito na instalação elétrica?",
+      "hint": "Em casas de banho, toda a instalação deve ser certificada IP44 ou superior.",
       "options": [
         {
           "value": "keep",
-          "label": "Manter a instalação elétrica atual"
+          "label": "Manter a instalação elétrica",
+          "description": "Sem alterações nos circuitos existentes"
         },
         {
           "value": "add_towel_rail",
-          "label": "Acrescentar toalheiro elétrico — mantendo a instalação existente"
+          "label": "Acrescentar toalheiro elétrico",
+          "description": "Mantendo a instalação existente"
         },
         {
           "value": "full_rewiring",
-          "label": "Instalação elétrica nova de raiz — circuitos, caixas e pontos de luz todos novos"
+          "label": "Instalação elétrica nova",
+          "description": "Circuitos, caixas e pontos de luz todos novos"
         }
       ],
       "generates": [
@@ -374,14 +409,17 @@
       "id": "bathroom_ventilation",
       "type": "single_select",
       "label": "Como está a ventilação da casa de banho?",
+      "hint": "A ventilação adequada é essencial para evitar humidade e bolor.",
       "options": [
         {
           "value": "existing",
-          "label": "Já tem ventilação suficiente — janela ou extrator existente em bom estado"
+          "label": "Já tem ventilação suficiente",
+          "description": "Janela ou extrator existente em bom estado"
         },
         {
           "value": "add_extractor",
-          "label": "Instalar extrator de ar novo — essencial para evitar humidade e bolor sem janela"
+          "label": "Instalar extrator de ar novo",
+          "description": "Essencial para evitar humidade e bolor sem janela"
         }
       ],
       "generates": [

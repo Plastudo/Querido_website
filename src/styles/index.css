@@ -1,0 +1,7 @@
+/* ============================================================
+   index.css — Design System: Orçamentos de Obras
+   Importar este ficheiro no ponto de entrada da aplicação.
+   ============================================================ */
+
+@import url('./tokens.css');
+@import url('./components.css');

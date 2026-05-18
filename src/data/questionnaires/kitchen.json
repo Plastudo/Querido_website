@@ -4,31 +4,37 @@
     {
       "id": "kitchen_area",
       "type": "number",
-      "label": "Qual é a área total da sua cozinha, em m²? (Ex.: uma cozinha de 4 m de comprimento × 3 m de largura = 12 m²)"
+      "label": "Qual é a área total da sua cozinha, em m²?",
+      "hint": "Use comprimento × largura. Exemplo: 4 m × 3 m = 12 m²"
     },
     {
       "id": "kitchen_state",
       "type": "single_select",
       "label": "Qual é o estado atual da cozinha?",
+      "hint": "Escolha a opção que melhor descreve a situação. Pode sempre ajustar depois.",
       "options": [
         {
           "value": "full_demolition",
-          "label": "Demolição completa — retirar tudo: azulejos, pavimento, armários e canalizações existentes"
+          "label": "Demolição completa",
+          "description": "Retirar tudo: azulejos, pavimento, armários e canalizações existentes"
         },
         {
           "value": "partial_renovation",
-          "label": "Renovação parcial — retirar apenas alguns elementos e manter outros"
+          "label": "Renovação parcial",
+          "description": "Retirar apenas alguns elementos e manter outros"
         },
         {
           "value": "just_finishing",
-          "label": "Apenas acabamentos — pintura, novos azulejos por cima, sem demolir nada"
+          "label": "Apenas acabamentos",
+          "description": "Pintura, novos azulejos por cima, sem demolir nada"
         }
       ]
     },
     {
       "id": "demolition_area",
       "type": "number",
-      "label": "Quantos m² precisam de demolição (azulejos, pavimento ou outros elementos a retirar)? Se não tem a certeza, use a área total da cozinha.",
+      "label": "Quantos m² precisam de demolição?",
+      "hint": "Inclua azulejos, pavimento e outros elementos a retirar. Se não tem a certeza, use a área total da cozinha.",
       "conditions": [
         { "questionId": "kitchen_state", "values": ["full_demolition", "partial_renovation"] }
       ],
@@ -39,26 +45,31 @@
     {
       "id": "kitchen_floor",
       "type": "single_select",
-      "label": "O que pretende fazer no pavimento da cozinha?",
+      "label": "O que pretende fazer no pavimento?",
+      "hint": "Pode sempre ajustar a escolha mais tarde no orçamento.",
       "options": [
         {
           "value": "keep",
-          "label": "Manter o pavimento atual"
+          "label": "Manter o pavimento atual",
+          "description": "Sem obras no chão"
         },
         {
           "value": "new_ceramic",
-          "label": "Novo pavimento cerâmico — mosaico ou porcelânico, durável e fácil de limpar"
+          "label": "Novo pavimento cerâmico",
+          "description": "Mosaico ou porcelânico, durável e fácil de limpar"
         },
         {
           "value": "new_vinyl",
-          "label": "Novo pavimento vinílico — mais económico, confortável e rápido de aplicar"
+          "label": "Novo pavimento vinílico",
+          "description": "Mais económico, confortável e rápido de aplicar"
         }
       ]
     },
     {
       "id": "floor_ceramic_area",
       "type": "number",
-      "label": "Quantos m² de pavimento cerâmico? (normalmente igual à área total da cozinha; adicione 10% para desperdício)",
+      "label": "Quantos m² de pavimento cerâmico?",
+      "hint": "Normalmente igual à área total da cozinha. Adicione 10% para compensar o desperdício de corte.",
       "conditions": [
         { "questionId": "kitchen_floor", "values": ["new_ceramic"] }
       ],
@@ -72,7 +83,8 @@
     {
       "id": "floor_vinyl_area",
       "type": "number",
-      "label": "Quantos m² de pavimento vinílico? (normalmente igual à área total da cozinha; adicione 5% para desperdício)",
+      "label": "Quantos m² de pavimento vinílico?",
+      "hint": "Normalmente igual à área total da cozinha. Adicione 5% para compensar o desperdício.",
       "conditions": [
         { "questionId": "kitchen_floor", "values": ["new_vinyl"] }
       ],
@@ -84,26 +96,31 @@
     {
       "id": "kitchen_walls",
       "type": "single_select",
-      "label": "O que pretende fazer nas paredes da cozinha?",
+      "label": "O que pretende fazer nas paredes?",
+      "hint": "A zona de confeção beneficia sempre de proteção adicional contra humidade e gordura.",
       "options": [
         {
           "value": "keep",
-          "label": "Manter as paredes como estão"
+          "label": "Manter as paredes",
+          "description": "Sem alterações nas paredes"
         },
         {
           "value": "new_tiles",
-          "label": "Novos azulejos nas paredes — proteção total contra humidade e gordura"
+          "label": "Novos azulejos nas paredes",
+          "description": "Proteção total contra humidade e gordura"
         },
         {
           "value": "paint_only",
-          "label": "Pintar as paredes — opção mais rápida e económica"
+          "label": "Pintar as paredes",
+          "description": "Opção mais rápida e económica"
         }
       ]
     },
     {
       "id": "wall_tile_area",
       "type": "number",
-      "label": "Quantos m² de azulejo para as paredes? (meça: largura de cada parede × altura a azulejar, geralmente entre 60 cm e 2,4 m)",
+      "label": "Quantos m² de azulejo para as paredes?",
+      "hint": "Calcule: largura de cada parede × altura a azulejar (tipicamente entre 0,6 m e 2,4 m).",
       "conditions": [
         { "questionId": "kitchen_walls", "values": ["new_tiles"] }
       ],
@@ -117,7 +134,8 @@
     {
       "id": "wall_paint_area",
       "type": "number",
-      "label": "Quantos m² de parede vai pintar? (some as áreas de cada parede: largura × altura de cada uma)",
+      "label": "Quantos m² de parede vai pintar?",
+      "hint": "Some as áreas de todas as paredes: largura × altura de cada uma.",
       "conditions": [
         { "questionId": "kitchen_walls", "values": ["paint_only"] }
       ],
@@ -130,26 +148,31 @@
     {
       "id": "kitchen_ceiling",
       "type": "single_select",
-      "label": "O que pretende fazer no teto da cozinha?",
+      "label": "O que pretende fazer no teto?",
+      "hint": "O teto é muitas vezes esquecido, mas tem grande impacto visual no resultado final.",
       "options": [
         {
           "value": "keep",
-          "label": "Manter o teto como está"
+          "label": "Manter o teto",
+          "description": "Sem alterações no teto"
         },
         {
           "value": "paint",
-          "label": "Pintar o teto — renovação simples e económica"
+          "label": "Pintar o teto",
+          "description": "Renovação simples e económica"
         },
         {
           "value": "new_false_ceiling",
-          "label": "Teto falso em pladur — esconde canalizações e dá acabamento moderno"
+          "label": "Teto falso em pladur",
+          "description": "Esconde canalizações e dá acabamento moderno"
         }
       ]
     },
     {
       "id": "ceiling_paint_area",
       "type": "number",
-      "label": "Quantos m² de teto vai pintar? (normalmente igual à área total da cozinha)",
+      "label": "Quantos m² de teto vai pintar?",
+      "hint": "Normalmente igual à área total da cozinha.",
       "conditions": [
         { "questionId": "kitchen_ceiling", "values": ["paint"] }
       ],
@@ -162,7 +185,8 @@
     {
       "id": "ceiling_false_area",
       "type": "number",
-      "label": "Quantos m² de teto falso (pladur)? (normalmente igual à área total da cozinha)",
+      "label": "Quantos m² de teto falso (pladur)?",
+      "hint": "Normalmente igual à área total da cozinha.",
       "conditions": [
         { "questionId": "kitchen_ceiling", "values": ["new_false_ceiling"] }
       ],
@@ -174,19 +198,23 @@
     {
       "id": "kitchen_plumbing",
       "type": "single_select",
-      "label": "O que vai ser feito na canalização de água da cozinha?",
+      "label": "O que vai ser feito na canalização de água?",
+      "hint": "Alterar a posição da pia implica obras de canalização adicionais.",
       "options": [
         {
           "value": "keep_existing",
-          "label": "Manter a canalização atual — a pia fica no mesmo sítio, sem alterar tubagens"
+          "label": "Manter a canalização",
+          "description": "A pia fica no mesmo sítio, sem alterar tubagens"
         },
         {
           "value": "move_sink",
-          "label": "Mudar o ponto de água — mover a pia ou acrescentar uma torneira noutra posição"
+          "label": "Mudar o ponto de água",
+          "description": "Mover a pia ou acrescentar uma torneira noutra posição"
         },
         {
           "value": "full_replumbing",
-          "label": "Canalização nova de raiz — tubagem de abastecimento e esgoto completamente nova"
+          "label": "Canalização nova de raiz",
+          "description": "Tubagem de abastecimento e esgoto completamente nova"
         }
       ],
       "generates": [
@@ -210,19 +238,23 @@
     {
       "id": "kitchen_electrical",
       "type": "single_select",
-      "label": "O que vai ser feito na instalação elétrica da cozinha?",
+      "label": "O que vai ser feito na instalação elétrica?",
+      "hint": "A cozinha é uma das divisões com maior consumo elétrico — vale a pena planear bem.",
       "options": [
         {
           "value": "keep",
-          "label": "Manter a instalação elétrica atual — tomadas e pontos de luz ficam iguais"
+          "label": "Manter a instalação elétrica",
+          "description": "Tomadas e pontos de luz ficam iguais"
         },
         {
           "value": "add_sockets",
-          "label": "Acrescentar tomadas e pontos de luz — mantendo a instalação existente"
+          "label": "Acrescentar tomadas e pontos de luz",
+          "description": "Mantendo a instalação existente"
         },
         {
           "value": "full_rewiring",
-          "label": "Instalação elétrica nova de raiz — circuitos, caixas e tomadas todos novos"
+          "label": "Instalação elétrica nova",
+          "description": "Circuitos, caixas e tomadas todos novos"
         }
       ],
       "generates": [
@@ -251,19 +283,23 @@
     {
       "id": "kitchen_furniture",
       "type": "single_select",
-      "label": "Pretende incluir mobiliário de cozinha no orçamento?",
+      "label": "Pretende incluir mobiliário no orçamento?",
+      "hint": "O mobiliário representa geralmente 30–50% do custo total de uma renovação de cozinha.",
       "options": [
         {
           "value": "not_included",
-          "label": "Não incluir — já tenho móveis ou vejo mais tarde"
+          "label": "Não incluir",
+          "description": "Já tenho móveis ou decido mais tarde"
         },
         {
           "value": "ikea_type",
-          "label": "Móveis de linha (tipo IKEA ou Leroy Merlin) — mais económico, gama variada, montagem simples"
+          "label": "Móveis de linha",
+          "description": "Tipo IKEA ou Leroy Merlin, gama variada, montagem simples"
         },
         {
           "value": "custom_carpentry",
-          "label": "Marcenaria à medida — feito para o seu espaço exato, acabamento superior e mais durável"
+          "label": "Marcenaria à medida",
+          "description": "Feito para o seu espaço, acabamento superior e mais durável"
         }
       ],
       "generates": [
@@ -288,18 +324,22 @@
       "id": "kitchen_appliances",
       "type": "single_select",
       "label": "Pretende incluir eletrodomésticos no orçamento?",
+      "hint": "Pode incluir apenas os que precisa e ajustar os preços unitários depois.",
       "options": [
         {
           "value": "not_included",
-          "label": "Não incluir — já tenho ou compro separado"
+          "label": "Não incluir",
+          "description": "Já tenho ou compro em separado"
         },
         {
           "value": "basic",
-          "label": "Gama básica — fogão, exaustor, frigorífico e máquina de lavar louça de entrada de gama"
+          "label": "Gama básica",
+          "description": "Fogão, exaustor, frigorífico e máquina de lavar louça de entrada de gama"
         },
         {
           "value": "premium",
-          "label": "Gama premium — eletrodomésticos de topo, maior eficiência energética e melhor acabamento"
+          "label": "Gama premium",
+          "description": "Eletrodomésticos de topo, maior eficiência energética e melhor acabamento"
         }
       ],
       "generates": [
