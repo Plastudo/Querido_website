@@ -33,6 +33,13 @@ export const colors = {
  */
 export const categories = [
   {
+    id: 'sala',
+    label: 'Sala',
+    subtitle: 'Pavimentos, revestimentos, carpintaria',
+    bg: 'rgb(238, 236, 230)',
+    icon: 'rgb(100, 85, 55)',
+  },
+  {
     id: 'cozinha',
     label: 'Cozinha',
     subtitle: 'Bancadas, armários, eletrodomésticos',

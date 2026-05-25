@@ -90,12 +90,6 @@ export default function BudgetPreview() {
 
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           <button
-            onClick={() => window.print()}
-            className="btn btn-secondary btn--sm"
-          >
-            Imprimir
-          </button>
-          <button
             onClick={() => withAuth(() => exportPDF(data))}
             className="btn btn-primary btn--sm"
             style={{ display: 'flex', alignItems: 'center', gap: 6 }}

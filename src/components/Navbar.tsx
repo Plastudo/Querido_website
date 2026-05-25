@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { useAdmin } from '../hooks/useAdmin';
 import { getSavedBudgets } from '../utils/storage';
 
 export default function Navbar() {
@@ -9,6 +10,7 @@ export default function Navbar() {
   const toggleLang = () => i18n.changeLanguage(i18n.language === 'pt' ? 'en' : 'pt');
 
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
+  const isAdmin = useAdmin();
 
   const [count, setCount] = useState(() => getSavedBudgets().length);
 
@@ -32,6 +34,19 @@ export default function Navbar() {
       <Link to="/" className="navbar__logo">Querido</Link>
 
       <div className="navbar__actions">
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className="btn btn-ghost btn--sm"
+            style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12.5, opacity: 0.7 }}
+          >
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+            Admin
+          </Link>
+        )}
+
         {isAuthenticated ? (
           <Link
             to="/area-cliente"
