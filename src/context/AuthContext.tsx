@@ -6,28 +6,25 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { supabase } from '../lib/supabase';
 import * as authService from '../services/authService';
 import type { AuthUser } from '../services/authService';
-import { getToken, isTokenExpired, removeToken, saveToken } from '../utils/tokenManager';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export type AuthMode = 'login' | 'register' | 'forgot-password';
 
 export interface AuthContextValue {
-  // Estado
   user: AuthUser | null;
   isAuthenticated: boolean;
-  isInitializing: boolean;  // true enquanto verifica o token guardado
+  isInitializing: boolean;
 
-  // Modal
   isModalOpen: boolean;
   modalMode: AuthMode;
   openAuthModal: (mode?: AuthMode, pendingAction?: (() => void) | null) => void;
   closeAuthModal: () => void;
   setModalMode: (mode: AuthMode) => void;
 
-  // Acções
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -41,27 +38,26 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser]               = useState<AuthUser | null>(null);
-  const [isInitializing, setInit]     = useState(true);
-  const [isModalOpen, setModalOpen]   = useState(false);
-  const [modalMode, setModalMode]     = useState<AuthMode>('login');
+  const [user, setUser]             = useState<AuthUser | null>(null);
+  const [isInitializing, setInit]   = useState(true);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode]   = useState<AuthMode>('login');
 
-  // Ref evita problemas de closure stale com pendingAction
   const pendingRef = useRef<(() => void) | null>(null);
 
-  // ── Verificação do token guardado ─────────────────────────────────────────
+  // ── Sessão Supabase ───────────────────────────────────────────────────────
 
   useEffect(() => {
-    const token = getToken();
-    if (!token || isTokenExpired(token)) {
-      removeToken();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session ? toAuthUser(session.user) : null);
       setInit(false);
-      return;
-    }
-    authService.verifyToken(token)
-      .then(u => setUser(u))
-      .catch(() => { removeToken(); })
-      .finally(() => setInit(false));
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session ? toAuthUser(session.user) : null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // ── Controlo do modal ─────────────────────────────────────────────────────
@@ -83,8 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ── Acções de autenticação ────────────────────────────────────────────────
 
   const login = useCallback(async (email: string, password: string) => {
-    const { token, user: u } = await authService.login({ email, password });
-    saveToken(token);
+    const u = await authService.login({ email, password });
     setUser(u);
     const pending = pendingRef.current;
     pendingRef.current = null;
@@ -93,8 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
-    const { token, user: u } = await authService.register({ name, email, password });
-    saveToken(token);
+    const u = await authService.register({ name, email, password });
     setUser(u);
     const pending = pendingRef.current;
     pendingRef.current = null;
@@ -102,8 +96,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     pending?.();
   }, []);
 
-  const logout = useCallback(() => {
-    removeToken();
+  const logout = useCallback(async () => {
+    await authService.logout();
     setUser(null);
   }, []);
 
@@ -153,4 +147,14 @@ export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth deve ser usado dentro de <AuthProvider>.');
   return ctx;
+}
+
+// ─── Utilitário interno ───────────────────────────────────────────────────────
+
+function toAuthUser(user: { id: string; email?: string; user_metadata?: Record<string, unknown> }): AuthUser {
+  return {
+    id: user.id,
+    name: (user.user_metadata?.['name'] as string | undefined) ?? user.email ?? '',
+    email: user.email ?? '',
+  };
 }
