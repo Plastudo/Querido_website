@@ -24,9 +24,15 @@ function compareIndex(a: string, b: string): number {
   return 0;
 }
 
+// ── Helpers for loading saved budgets ────────────────────────────────────────
+
+export function answersToHistory(answers: Record<string, string | number>): HistoryEntry[] {
+  return Object.entries(answers).map(([questionIndex, answer]) => ({ questionIndex, answer }));
+}
+
 // ── Budget builder ─────────────────────────────────────────────────────────────
 
-function buildBudget(
+export function buildBudget(
   questions: QuestionWithOptions[],
   history: HistoryEntry[],
 ): LiveBudget {
