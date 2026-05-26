@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import type { Project, ProjectDivision, BudgetItem, Unit } from '../../types';
 import type { PDFData } from '../../utils/exportPDF';
-import { saveBudget, updateBudget } from '../../utils/storage';
+import {
+  createClientBudget,
+  updateClientBudget,
+  type DivisionToSave,
+} from '../../services/clientBudgetService';
 import { useProtectedAction } from '../../hooks/useProtectedAction';
 
 const REGION_MULTIPLIER = {
@@ -137,8 +141,10 @@ export default function ConsolidatedBudgetView({ project, savedBudgetId, onBack,
   const [divisions, setDivisions] = useState<ProjectDivision[]>(() => cloneDivisions(project.divisions));
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [saveMode, setSaveMode] = useState<'idle' | 'choosing' | 'saved'>('idle');
-  // true logo que o utilizador edita um campo; false ao carregar e após guardar
   const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [activeBudgetId, setActiveBudgetId] = useState<string | undefined>(savedBudgetId);
 
   // ── Mutação de itens ─────────────────────────────────────────────────────────
 
@@ -198,23 +204,52 @@ export default function ConsolidatedBudgetView({ project, savedBudgetId, onBack,
     setTimeout(() => setSaveMode('idle'), 2500);
   };
 
-  const handleSaveClick = () => {
-    if (savedBudgetId) {
+  const buildDivisionsPayload = (): DivisionToSave[] =>
+    divisions.map(d => ({ workType: d.workType, answers: d.answers ?? {} }));
+
+  const handleSaveClick = async () => {
+    setSaveError(null);
+    if (activeBudgetId) {
       setSaveMode('choosing');
-    } else {
-      saveBudget(editedProject, title, grandTotal);
+      return;
+    }
+    try {
+      setIsSaving(true);
+      const newId = await createClientBudget(title, region, buildDivisionsPayload());
+      setActiveBudgetId(newId);
       confirmSaved();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Erro ao guardar');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleUpdate = () => {
-    updateBudget(savedBudgetId!, editedProject, title, grandTotal);
-    confirmSaved();
+  const handleUpdate = async () => {
+    setSaveError(null);
+    try {
+      setIsSaving(true);
+      await updateClientBudget(activeBudgetId!, buildDivisionsPayload());
+      confirmSaved();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Erro ao guardar');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleSaveAsNew = () => {
-    saveBudget(editedProject, title, grandTotal);
-    confirmSaved();
+  const handleSaveAsNew = async () => {
+    setSaveError(null);
+    try {
+      setIsSaving(true);
+      const newId = await createClientBudget(title, region, buildDivisionsPayload());
+      setActiveBudgetId(newId);
+      confirmSaved();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Erro ao guardar');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleCollapse = (key: string) =>
@@ -625,18 +660,30 @@ export default function ConsolidatedBudgetView({ project, savedBudgetId, onBack,
               </div>
             )}
 
+            {saveError && (
+              <span style={{ fontSize: 12, color: '#dc2626', marginRight: 4 }}>
+                {saveError}
+              </span>
+            )}
             <button
               className={saveMode === 'saved' ? 'btn btn-secondary' : 'btn btn-primary'}
               onClick={() => withAuth(handleSaveClick)}
-              disabled={!!savedBudgetId && !isDirty && saveMode === 'idle'}
+              disabled={isSaving || (!!activeBudgetId && !isDirty && saveMode === 'idle')}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 transition: 'opacity 0.2s',
-                opacity: (!!savedBudgetId && !isDirty && saveMode === 'idle') ? 0.4 : undefined,
-                cursor: (!!savedBudgetId && !isDirty && saveMode === 'idle') ? 'not-allowed' : undefined,
+                opacity: (isSaving || (!!activeBudgetId && !isDirty && saveMode === 'idle')) ? 0.4 : undefined,
+                cursor: (isSaving || (!!activeBudgetId && !isDirty && saveMode === 'idle')) ? 'not-allowed' : undefined,
               }}
             >
-              {saveMode === 'saved' ? (
+              {isSaving ? (
+                <>
+                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  A guardar…
+                </>
+              ) : saveMode === 'saved' ? (
                 <>
                   <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />

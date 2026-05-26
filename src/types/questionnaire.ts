@@ -67,6 +67,30 @@ export interface HistoryEntry {
   answer: QuestionnaireAnswer;
 }
 
+// ── Client budget persistence ─────────────────────────────────────────────────
+
+export interface ClientBudget {
+  id: string;
+  user_id: string;
+  name: string;
+  region: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ClientBudgetDivision {
+  id: string;
+  budget_id: string;
+  division_id: number;
+  answers: Record<string, QuestionnaireAnswer>;
+  saved_at: string;
+  divisions?: { prefix: string | null; label: string };
+}
+
+export interface ClientBudgetWithDivisions extends ClientBudget {
+  client_budget_divisions: ClientBudgetDivision[];
+}
+
 // ── Budget output ─────────────────────────────────────────────────────────────
 
 export interface BudgetLineItem {

@@ -94,6 +94,8 @@ export interface ProjectDivision {
   workType: string;
   label: string;
   budget: Budget;
+  /** Raw questionnaire answers — used for Supabase persistence and budget recalculation */
+  answers?: Record<string, string | number>;
 }
 
 export interface Project {
