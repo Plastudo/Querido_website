@@ -56,12 +56,15 @@ export async function createClientBudget(
   region: Region,
   divisions: DivisionToSave[],
 ): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Utilizador não autenticado.');
+
   const prefixes = divisions.map(d => d.workType).filter(Boolean);
   const idMap = await resolveDivisionIds(prefixes);
 
   const { data: budget, error: budgetErr } = await supabase
     .from('client_budgets')
-    .insert({ name, region })
+    .insert({ name, region, user_id: user.id })
     .select('id')
     .single();
   if (budgetErr) throw new Error(budgetErr.message);
