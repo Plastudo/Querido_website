@@ -13,6 +13,7 @@ import ClientArea from './pages/ClientArea';
 import StyleGuide from './pages/StyleGuide';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import QuestionnaireEditor from './pages/Admin/QuestionnaireEditor';
+import FeedbackWidget from './components/FeedbackWidget';
 
 function SupabaseQuestionnairePage() {
   const { prefix = '' } = useParams<{ prefix: string }>();
@@ -32,6 +33,7 @@ function MainLayout() {
 export default function App() {
   return (
     <BrowserRouter>
+      <FeedbackWidget />
       <Routes>
         {/* ── Main app ──────────────────────────────────────────────────────── */}
         <Route element={<MainLayout />}>
