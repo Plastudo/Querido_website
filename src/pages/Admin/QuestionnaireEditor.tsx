@@ -25,12 +25,22 @@ const C = {
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  boolean: 'Sim/Não', choice: 'Escolha', numeric: 'Número', text: 'Texto',
+  boolean: 'Sim/Não', choice: 'Escolha única', multi_choice: 'Escolha múltipla', numeric: 'Número', text: 'Texto',
 };
 const TYPE_COLOR: Record<string, string> = {
   boolean: 'rgba(83,74,183,0.13)', choice: 'rgba(83,74,183,0.08)',
+  multi_choice: 'rgba(63,106,130,0.12)',
   numeric: 'rgba(35,110,50,0.1)', text: 'rgba(155,122,31,0.12)',
 };
+
+const UNIT_OPTIONS = [
+  { value: '', label: 'Sem unidade' },
+  { value: 'm2', label: 'm²' },
+  { value: 'ml', label: 'ml (metro linear)' },
+  { value: 'un', label: 'un (unidade)' },
+  { value: 'vg', label: 'vg (verba global)' },
+  { value: 'm3', label: 'm³' },
+];
 
 const inputCss: React.CSSProperties = {
   padding: '7px 10px', fontSize: 13.5, color: C.text,
@@ -47,7 +57,7 @@ const labelCss: React.CSSProperties = {
 function blank(): AdminQuestion {
   return {
     index: '', text: '', type: 'choice', required: true,
-    help_text: '', order_index: 1, parent_index: '', next_question_index: '', options: [],
+    help_text: '', unit: '', order_index: 1, parent_index: '', next_question_index: '', options: [],
   };
 }
 
@@ -56,6 +66,7 @@ function blankOption(): AdminOption {
     value: '', label: '', next_question_index: '', is_final_answer: false,
     order_index: 0, costs: { material: 0, labor: 0, overhead: 0 },
     quantity_formula: '', budget_description: '', budget_category: '',
+    is_addon: false, addon_info: '',
   };
 }
 
@@ -134,8 +145,8 @@ function OptionRow({
             </div>
           </div>
 
-          {/* Row 2: Next question + Final */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'end' }}>
+          {/* Row 2: Next question + flags */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 12, alignItems: 'end' }}>
             <div>
               <label style={labelCss}>Próxima pergunta (skip logic)</label>
               <input style={inputCss} value={opt.next_question_index}
@@ -149,7 +160,26 @@ function OptionRow({
                 Resposta final
               </label>
             </div>
+            <div style={{ paddingBottom: 1 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontSize: 13, color: C.text, whiteSpace: 'nowrap' }}>
+                <input type="checkbox" checked={opt.is_addon}
+                  onChange={e => onChange({ is_addon: e.target.checked })} />
+                Add-on (checkbox)
+              </label>
+            </div>
           </div>
+
+          {/* Addon info (shown only when is_addon) */}
+          {opt.is_addon && (
+            <div>
+              <label style={labelCss}>Texto do tooltip (informação do add-on)</label>
+              <textarea
+                style={{ ...inputCss, minHeight: 52, resize: 'vertical' }}
+                value={opt.addon_info}
+                onChange={e => onChange({ addon_info: e.target.value })}
+                placeholder="Ex: Caso a parede não esteja em condições de pintura direta, será necessário um barramento com custo acrescido." />
+            </div>
+          )}
 
           {/* Separator */}
           <div style={{ borderTop: `1px solid ${C.border}` }} />
@@ -205,12 +235,13 @@ function OptionRow({
 
 function QuestionPanel({
   editQ, deletedOptionIds, isSaving, saveState, onSave, onDelete,
-  onQuestionChange, onAddOption, onRemoveOption, onOptionChange,
+  onQuestionChange, onAddOption, onRemoveOption, onOptionChange, saveError,
 }: {
   editQ: AdminQuestion;
   deletedOptionIds: number[];
   isSaving: boolean;
   saveState: 'idle' | 'success' | 'error';
+  saveError: string;
   onSave: () => void;
   onDelete: () => void;
   onQuestionChange: (changes: Partial<AdminQuestion>) => void;
@@ -219,7 +250,7 @@ function QuestionPanel({
   onOptionChange: (idx: number, changes: Partial<AdminOption>) => void;
 }) {
   const [expandedOptions, setExpandedOptions] = useState<Set<number>>(new Set());
-  const showOptions = editQ.type === 'choice' || editQ.type === 'boolean';
+  const showOptions = editQ.type === 'choice' || editQ.type === 'multi_choice' || editQ.type === 'boolean';
 
   const toggleOption = (idx: number) =>
     setExpandedOptions(prev => {
@@ -276,15 +307,16 @@ function QuestionPanel({
             />
           </div>
 
-          {/* Type + Required */}
-          <div style={{ display: 'grid', gridTemplateColumns: '140px 80px 1fr', gap: 12, marginBottom: 12, alignItems: 'end' }}>
+          {/* Type + Index + Required */}
+          <div style={{ display: 'grid', gridTemplateColumns: '160px 80px 120px 1fr', gap: 12, marginBottom: 12, alignItems: 'end' }}>
             <div>
               <label style={labelCss}>Tipo *</label>
               <select
                 style={{ ...inputCss }}
                 value={editQ.type}
                 onChange={e => onQuestionChange({ type: e.target.value as AdminQuestion['type'] })}>
-                <option value="choice">Escolha múltipla</option>
+                <option value="choice">Escolha única</option>
+                <option value="multi_choice">Escolha múltipla</option>
                 <option value="boolean">Sim / Não</option>
                 <option value="numeric">Número</option>
                 <option value="text">Texto livre</option>
@@ -295,6 +327,17 @@ function QuestionPanel({
               <input style={inputCss} value={editQ.index}
                 onChange={e => onQuestionChange({ index: e.target.value })}
                 placeholder="Ex: 2.4" />
+            </div>
+            <div>
+              <label style={labelCss}>Unidade</label>
+              <select
+                style={{ ...inputCss }}
+                value={editQ.unit}
+                onChange={e => onQuestionChange({ unit: e.target.value })}>
+                {UNIT_OPTIONS.map(u => (
+                  <option key={u.value} value={u.value}>{u.label}</option>
+                ))}
+              </select>
             </div>
             <div style={{ paddingBottom: 1 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontSize: 13, color: C.text }}>
@@ -325,10 +368,12 @@ function QuestionPanel({
 
           {/* Help text */}
           <div>
-            <label style={labelCss}>Texto de ajuda</label>
-            <input style={inputCss} value={editQ.help_text}
+            <label style={labelCss}>Texto de ajuda (suporta markdown: **negrito**, - lista, linha vazia = parágrafo)</label>
+            <textarea
+              style={{ ...inputCss, minHeight: 72, resize: 'vertical' }}
+              value={editQ.help_text}
               onChange={e => onQuestionChange({ help_text: e.target.value })}
-              placeholder="Instrução adicional (opcional)" />
+              placeholder={'Ex: Use **negrito** para realçar.\n- Ponto 1\n- Ponto 2'} />
           </div>
         </section>
 
@@ -406,7 +451,7 @@ function QuestionPanel({
             <span style={{ fontSize: 13, color: C.success }}>✓ Guardado</span>
           )}
           {saveState === 'error' && (
-            <span style={{ fontSize: 13, color: C.danger }}>✗ Erro ao guardar</span>
+            <span style={{ fontSize: 13, color: C.danger }} title={saveError}>✗ Erro: {saveError || 'Erro ao guardar'}</span>
           )}
           {deletedOptionIds.length > 0 && saveState === 'idle' && (
             <span style={{ fontSize: 12, color: C.textTert }}>{deletedOptionIds.length} opção(ões) a remover</span>
@@ -457,7 +502,7 @@ function QuestionListItem({ q, isSelected, onClick }: {
         padding: '2px 7px', borderRadius: 99, flexShrink: 0,
         letterSpacing: '0.04em',
       }}>
-        {q.type === 'boolean' ? 'S/N' : q.type === 'choice' ? 'CH' : q.type === 'numeric' ? 'NM' : 'TX'}
+        {q.type === 'boolean' ? 'S/N' : q.type === 'choice' ? '1×' : q.type === 'multi_choice' ? 'N×' : q.type === 'numeric' ? 'NM' : 'TX'}
       </span>
     </button>
   );
@@ -473,6 +518,7 @@ export default function QuestionnaireEditor() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'success' | 'error'>('idle');
+  const [saveError, setSaveError] = useState('');
 
   // Current edit state
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null);
@@ -512,6 +558,7 @@ export default function QuestionnaireEditor() {
     if (!editQ) return;
     setIsSaving(true);
     setSaveState('idle');
+    setSaveError('');
     try {
       const pos = editQ.id
         ? questions.findIndex(q => q.index === editQ.index)
@@ -532,8 +579,9 @@ export default function QuestionnaireEditor() {
       setDeletedOptionIds([]);
       setSaveState('success');
       setTimeout(() => setSaveState('idle'), 2500);
-    } catch {
+    } catch (err) {
       setSaveState('error');
+      setSaveError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setIsSaving(false);
     }
@@ -654,6 +702,7 @@ export default function QuestionnaireEditor() {
               deletedOptionIds={deletedOptionIds}
               isSaving={isSaving}
               saveState={saveState}
+              saveError={saveError}
               onSave={handleSave}
               onDelete={handleDelete}
               onQuestionChange={changes => setEditQ(q => q ? { ...q, ...changes } : q)}

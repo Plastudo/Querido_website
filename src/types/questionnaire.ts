@@ -4,9 +4,10 @@ export interface DBQuestion {
   id: number;
   index: string;
   text: string;
-  type: 'boolean' | 'numeric' | 'choice' | 'text';
+  type: 'boolean' | 'numeric' | 'choice' | 'multi_choice' | 'text';
   required: boolean;
   help_text: string | null;
+  unit: string | null;
   order_index: number;
   parent_index: string | null;
   next_question_index: string | null;
@@ -20,6 +21,8 @@ export interface DBOption {
   next_question_index: string | null;
   is_final_answer: boolean;
   order_index: number;
+  is_addon: boolean;
+  addon_info: string | null;
 }
 
 export interface DBQuestionRule {

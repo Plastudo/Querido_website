@@ -45,6 +45,28 @@ export function buildBudget(
     const question = questionMap.get(questionIndex);
     if (!question) continue;
 
+    if (question.type === 'multi_choice') {
+      // answer is JSON array of selected values (e.g. '["v1","v2"]')
+      let selected: string[] = [];
+      try { selected = JSON.parse(String(answer)); } catch { selected = [String(answer)]; }
+      for (const val of selected) {
+        const opt = question.options.find(o => o.value === val);
+        if (!opt?.budgetItem || !opt.costs.length) continue;
+        const quantity = resolveQuantity(opt, numericAnswers);
+        if (quantity <= 0) continue;
+        const material  = costOf(opt, 'material')  * quantity;
+        const labor     = costOf(opt, 'labor')     * quantity;
+        const overhead  = costOf(opt, 'overhead')  * quantity;
+        lineItems.push({
+          optionId: opt.id, description: opt.budgetItem.description,
+          category: opt.budgetItem.category, quantity,
+          materialCost: material, laborCost: labor, overheadCost: overhead,
+          totalCost: material + labor + overhead,
+        });
+      }
+      continue;
+    }
+
     // Only choice/boolean questions drive budget items
     if (question.type !== 'choice' && question.type !== 'boolean') continue;
 
@@ -157,6 +179,8 @@ export interface UseSupabaseQuestionnaireReturn {
   canGoBack: boolean;
   /** Call for boolean and choice questions */
   answerWithOption: (option: OptionWithDetails) => void;
+  /** Call for multi_choice questions */
+  answerMulti: (values: string[], options: OptionWithDetails[]) => void;
   /** Call for numeric questions */
   answerNumeric: (value: number) => void;
   /** Call for text questions */
@@ -245,6 +269,11 @@ export function useSupabaseQuestionnaire(
     [advance],
   );
 
+  const answerMulti = useCallback(
+    (values: string[], _options: OptionWithDetails[]) => advance(JSON.stringify(values), null),
+    [advance],
+  );
+
   const answerNumeric = useCallback(
     (value: number) => advance(value, null),
     [advance],
@@ -281,6 +310,7 @@ export function useSupabaseQuestionnaire(
     error,
     canGoBack: history.length > 0,
     answerWithOption,
+    answerMulti,
     answerNumeric,
     answerText,
     goBack,

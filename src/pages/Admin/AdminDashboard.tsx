@@ -397,7 +397,8 @@ export default function AdminDashboard() {
 
   const handleSave = async (data: DivisionInput & { id?: number }) => {
     if (data.id) {
-      await updateDivision(data.id, data);
+      const { id, ...payload } = data;
+      await updateDivision(id, payload);
     } else {
       await createDivision(data);
     }

@@ -67,15 +67,18 @@ export interface AdminOption {
   quantity_formula: string;
   budget_description: string;
   budget_category: string;
+  is_addon: boolean;
+  addon_info: string;
 }
 
 export interface AdminQuestion {
   id?: number;
   index: string;
   text: string;
-  type: 'boolean' | 'numeric' | 'choice' | 'text';
+  type: 'boolean' | 'numeric' | 'choice' | 'multi_choice' | 'text';
   required: boolean;
   help_text: string;
+  unit: string;
   order_index: number;
   parent_index: string;
   next_question_index: string;
@@ -88,9 +91,9 @@ export async function fetchAdminQuestions(prefix: string): Promise<AdminQuestion
   const { data, error } = await supabase
     .from('questions')
     .select(`
-      id, index, text, type, required, help_text, order_index, parent_index, next_question_index,
+      id, index, text, type, required, help_text, unit, order_index, parent_index, next_question_index,
       options (
-        id, value, label, next_question_index, is_final_answer, order_index,
+        id, value, label, next_question_index, is_final_answer, order_index, is_addon, addon_info,
         question_rules ( rule_type, quantity_formula ),
         costs ( cost_type, value ),
         budget_items ( description, category, order_index )
@@ -122,6 +125,8 @@ export async function fetchAdminQuestions(prefix: string): Promise<AdminQuestion
         quantity_formula:     rule?.quantity_formula ?? '',
         budget_description:   bi?.description ?? '',
         budget_category:      bi?.category ?? '',
+        is_addon:             o.is_addon ?? false,
+        addon_info:           o.addon_info ?? '',
       };
     }).sort((a: AdminOption, b: AdminOption) => a.order_index - b.order_index);
 
@@ -132,6 +137,7 @@ export async function fetchAdminQuestions(prefix: string): Promise<AdminQuestion
       type:                 q.type,
       required:             q.required,
       help_text:            q.help_text ?? '',
+      unit:                 q.unit ?? '',
       order_index:          q.order_index ?? 0,
       parent_index:         q.parent_index ?? '',
       next_question_index:  q.next_question_index ?? '',
@@ -152,6 +158,7 @@ export async function saveQuestion(
     type:                q.type,
     required:            q.required,
     help_text:           q.help_text || null,
+    unit:                q.unit || null,
     order_index:         q.order_index,
     parent_index:        q.parent_index || null,
     next_question_index: q.next_question_index || null,
@@ -182,6 +189,8 @@ export async function saveQuestion(
       next_question_index: opt.next_question_index || null,
       is_final_answer:     opt.is_final_answer,
       order_index:         opt.order_index,
+      is_addon:            opt.is_addon,
+      addon_info:          opt.addon_info || null,
     };
 
     let optionId: number;

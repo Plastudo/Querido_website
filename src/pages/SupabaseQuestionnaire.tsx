@@ -37,6 +37,7 @@ export default function SupabaseQuestionnaire({
     error,
     canGoBack,
     answerWithOption,
+    answerMulti,
     answerNumeric,
     answerText,
     goBack,
@@ -140,6 +141,7 @@ export default function SupabaseQuestionnaire({
               question={currentQuestion}
               savedAnswer={answers[currentQuestion.index]}
               onAnswerWithOption={answerWithOption}
+              onAnswerMulti={answerMulti}
               onAnswerNumeric={answerNumeric}
               onAnswerText={answerText}
               onBack={goBack}
