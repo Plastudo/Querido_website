@@ -69,6 +69,7 @@ export interface AdminOption {
   budget_category: string;
   is_addon: boolean;
   addon_info: string;
+  parent_option_id: number | null;
 }
 
 export interface AdminQuestion {
@@ -93,7 +94,7 @@ export async function fetchAdminQuestions(prefix: string): Promise<AdminQuestion
     .select(`
       id, index, text, type, required, help_text, unit, order_index, parent_index, next_question_index,
       options (
-        id, value, label, next_question_index, is_final_answer, order_index, is_addon, addon_info,
+        id, value, label, next_question_index, is_final_answer, order_index, is_addon, addon_info, parent_option_id,
         question_rules ( rule_type, quantity_formula ),
         costs ( cost_type, value ),
         budget_items ( description, category, order_index )
@@ -127,6 +128,7 @@ export async function fetchAdminQuestions(prefix: string): Promise<AdminQuestion
         budget_category:      bi?.category ?? '',
         is_addon:             o.is_addon ?? false,
         addon_info:           o.addon_info ?? '',
+        parent_option_id:     o.parent_option_id ?? null,
       };
     }).sort((a: AdminOption, b: AdminOption) => a.order_index - b.order_index);
 
@@ -191,6 +193,7 @@ export async function saveQuestion(
       order_index:         opt.order_index,
       is_addon:            opt.is_addon,
       addon_info:          opt.addon_info || null,
+      parent_option_id:    opt.parent_option_id ?? null,
     };
 
     let optionId: number;

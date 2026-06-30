@@ -66,7 +66,7 @@ function blankOption(): AdminOption {
     value: '', label: '', next_question_index: '', is_final_answer: false,
     order_index: 0, costs: { material: 0, labor: 0, overhead: 0 },
     quantity_formula: '', budget_description: '', budget_category: '',
-    is_addon: false, addon_info: '',
+    is_addon: false, addon_info: '', parent_option_id: null,
   };
 }
 
@@ -75,7 +75,7 @@ function deepClone<T>(x: T): T { return JSON.parse(JSON.stringify(x)); }
 // ── Option Editor Row ──────────────────────────────────────────────────────────
 
 function OptionRow({
-  opt, idx, expanded, onToggle, onChange, onRemove,
+  opt, idx, expanded, onToggle, onChange, onRemove, siblingOptions,
 }: {
   opt: AdminOption;
   idx: number;
@@ -83,6 +83,7 @@ function OptionRow({
   onToggle: () => void;
   onChange: (changes: Partial<AdminOption>) => void;
   onRemove: () => void;
+  siblingOptions: AdminOption[];
 }) {
   const hasCosts = opt.costs.material > 0 || opt.costs.labor > 0;
   const summary = [
@@ -178,6 +179,23 @@ function OptionRow({
               onChange={e => onChange({ addon_info: e.target.value })}
               placeholder="Ex: O preço de afagar inclui verniz/vitrificação." />
           </div>
+
+          {/* Parent option — only for add-ons */}
+          {opt.is_addon && (
+            <div>
+              <label style={labelCss}>Aparece debaixo de qual opção? (add-on ligado)</label>
+              <select
+                style={{ ...inputCss, cursor: 'pointer' }}
+                value={opt.parent_option_id ?? ''}
+                onChange={e => onChange({ parent_option_id: e.target.value ? Number(e.target.value) : null })}
+              >
+                <option value="">Global (extra para toda a pergunta)</option>
+                {siblingOptions.filter(s => !s.is_addon && s.id).map(s => (
+                  <option key={s.id} value={s.id}>{s.label || s.value}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Separator */}
           <div style={{ borderTop: `1px solid ${C.border}` }} />
@@ -410,6 +428,7 @@ function QuestionPanel({
                     onToggle={() => toggleOption(idx)}
                     onChange={changes => onOptionChange(idx, changes)}
                     onRemove={() => onRemoveOption(idx)}
+                    siblingOptions={editQ.options}
                   />
                 ))}
               </div>

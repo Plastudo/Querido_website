@@ -70,26 +70,34 @@ export function buildBudget(
     // Only choice/boolean questions drive budget items
     if (question.type !== 'choice' && question.type !== 'boolean') continue;
 
-    const selectedOption = question.options.find(o => o.value === String(answer));
-    if (!selectedOption?.budgetItem || !selectedOption.costs.length) continue;
+    // Answer may be a JSON array when option + linked add-ons were selected
+    let selectedValues: string[];
+    try {
+      const parsed = JSON.parse(String(answer));
+      selectedValues = Array.isArray(parsed) ? parsed : [String(answer)];
+    } catch {
+      selectedValues = [String(answer)];
+    }
 
-    const quantity = resolveQuantity(selectedOption, numericAnswers);
-    if (quantity <= 0) continue;
-
-    const material  = costOf(selectedOption, 'material')  * quantity;
-    const labor     = costOf(selectedOption, 'labor')     * quantity;
-    const overhead  = costOf(selectedOption, 'overhead')  * quantity;
-
-    lineItems.push({
-      optionId:     selectedOption.id,
-      description:  selectedOption.budgetItem.description,
-      category:     selectedOption.budgetItem.category,
-      quantity,
-      materialCost: material,
-      laborCost:    labor,
-      overheadCost: overhead,
-      totalCost:    material + labor + overhead,
-    });
+    for (const val of selectedValues) {
+      const opt = question.options.find(o => o.value === val);
+      if (!opt?.budgetItem || !opt.costs.length) continue;
+      const quantity = resolveQuantity(opt, numericAnswers);
+      if (quantity <= 0) continue;
+      const material  = costOf(opt, 'material')  * quantity;
+      const labor     = costOf(opt, 'labor')     * quantity;
+      const overhead  = costOf(opt, 'overhead')  * quantity;
+      lineItems.push({
+        optionId:     opt.id,
+        description:  opt.budgetItem.description,
+        category:     opt.budgetItem.category,
+        quantity,
+        materialCost: material,
+        laborCost:    labor,
+        overheadCost: overhead,
+        totalCost:    material + labor + overhead,
+      });
+    }
   }
 
   // Group by category
@@ -177,8 +185,8 @@ export interface UseSupabaseQuestionnaireReturn {
   isComplete: boolean;
   error: string | null;
   canGoBack: boolean;
-  /** Call for boolean and choice questions */
-  answerWithOption: (option: OptionWithDetails) => void;
+  /** Call for boolean and choice questions (pass addonOptions when linked add-ons are selected) */
+  answerWithOption: (option: OptionWithDetails, addonOptions?: OptionWithDetails[]) => void;
   /** Call for multi_choice questions */
   answerMulti: (values: string[], options: OptionWithDetails[]) => void;
   /** Call for numeric questions */
@@ -265,7 +273,14 @@ export function useSupabaseQuestionnaire(
   );
 
   const answerWithOption = useCallback(
-    (option: OptionWithDetails) => advance(option.value, option),
+    (option: OptionWithDetails, addonOptions?: OptionWithDetails[]) => {
+      if (addonOptions && addonOptions.length > 0) {
+        const allValues = [option.value, ...addonOptions.map(o => o.value)];
+        advance(JSON.stringify(allValues), option);
+      } else {
+        advance(option.value, option);
+      }
+    },
     [advance],
   );
 

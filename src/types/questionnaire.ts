@@ -23,6 +23,7 @@ export interface DBOption {
   order_index: number;
   is_addon: boolean;
   addon_info: string | null;
+  parent_option_id: number | null;
 }
 
 export interface DBQuestionRule {

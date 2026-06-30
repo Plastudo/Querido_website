@@ -5,7 +5,7 @@ interface Props {
   question: QuestionWithOptions;
   savedAnswer: string | number | undefined;
   savedMultiAnswers?: string[];
-  onAnswerWithOption: (option: OptionWithDetails) => void;
+  onAnswerWithOption: (option: OptionWithDetails, addonOptions?: OptionWithDetails[]) => void;
   onAnswerMulti: (values: string[], options: OptionWithDetails[]) => void;
   onAnswerNumeric: (value: number) => void;
   onAnswerText: (value: string) => void;
@@ -63,6 +63,17 @@ export default function QuestionRenderer({
   const [textValue, setTextValue] = useState('');
   const [multiSelected, setMultiSelected] = useState<Set<string>>(new Set(savedMultiAnswers));
   const [addonSelected, setAddonSelected] = useState<Set<string>>(new Set());
+  const [pendingChoice, setPendingChoice] = useState<OptionWithDetails | null>(null);
+
+  // Parse savedAnswer — may be JSON array "[mainValue, addon1, ...]" when linked add-ons were selected
+  const parsedSavedChoice = (() => {
+    if (savedAnswer === undefined) return { mainValue: undefined, addonValues: [] as string[] };
+    try {
+      const parsed = JSON.parse(String(savedAnswer));
+      if (Array.isArray(parsed)) return { mainValue: parsed[0] as string, addonValues: parsed.slice(1) as string[] };
+    } catch { /* not JSON */ }
+    return { mainValue: String(savedAnswer), addonValues: [] as string[] };
+  })();
 
   useEffect(() => {
     setNumericValue(
@@ -72,7 +83,9 @@ export default function QuestionRenderer({
       question.type === 'text' && savedAnswer !== undefined ? String(savedAnswer) : '',
     );
     setMultiSelected(new Set(savedMultiAnswers));
-    setAddonSelected(new Set());
+    // Restore add-on state when going back to a question that had linked add-ons
+    setAddonSelected(new Set(parsedSavedChoice.addonValues));
+    setPendingChoice(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id, savedAnswer, question.type]);
 
@@ -93,7 +106,15 @@ export default function QuestionRenderer({
   };
 
   const mainOptions = question.options.filter(o => !o.is_addon);
-  const addonOptions = question.options.filter(o => o.is_addon);
+  const globalAddonOptions = question.options.filter(o => o.is_addon && !o.parent_option_id);
+  // Map from parent option id → linked add-ons
+  const linkedAddonsMap = new Map<number, OptionWithDetails[]>();
+  for (const o of question.options.filter(o => o.is_addon && o.parent_option_id != null)) {
+    const list = linkedAddonsMap.get(o.parent_option_id!) ?? [];
+    list.push(o);
+    linkedAddonsMap.set(o.parent_option_id!, list);
+  }
+  const hasLinkedAddons = linkedAddonsMap.size > 0;
 
   const handleMultiToggle = (value: string) => {
     setMultiSelected(prev => {
@@ -119,63 +140,88 @@ export default function QuestionRenderer({
 
   // ── Option button (single select: boolean + choice) ───────────────────────────
   const OptionButton = ({ option }: { option: OptionWithDetails }) => {
-    const isSelected = savedAnswer === option.value;
+    const activeValue = pendingChoice?.value ?? parsedSavedChoice.mainValue;
+    const isSelected = activeValue === option.value;
     const [showInfo, setShowInfo] = useState(false);
+    const linkedAddons = linkedAddonsMap.get(option.id) ?? [];
+
+    const handleClick = () => {
+      if (hasLinkedAddons) {
+        // Select without auto-advancing — user must click Continuar
+        setPendingChoice(option);
+        setAddonSelected(new Set());
+      } else {
+        onAnswerWithOption(option);
+      }
+    };
+
     return (
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => onAnswerWithOption(option)}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onAnswerWithOption(option); }}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '14px 20px',
-          background: isSelected ? 'var(--color-primary-bg)' : 'var(--color-bg-card)',
-          border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border-input)'}`,
-          borderRadius: 'var(--radius-input)',
-          cursor: 'pointer',
-          transition: 'border-color var(--transition-base), background var(--transition-base)',
-          userSelect: 'none',
-        }}
-        onMouseEnter={e => {
-          if (!isSelected)
-            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.25)';
-        }}
-        onMouseLeave={e => {
-          if (!isSelected)
-            (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-input)';
-        }}
-      >
-        <span style={{ flex: 1, fontSize: 17, fontWeight: 500, letterSpacing: -0.2, color: 'var(--color-text-primary)', lineHeight: 1.3 }}>
-          {option.label}
-        </span>
-        {option.addon_info && (
-          <div
-            style={{ position: 'relative', flexShrink: 0 }}
-            onClick={e => { e.stopPropagation(); setShowInfo(v => !v); }}
-          >
-            <div style={{
-              width: 20, height: 20, borderRadius: '50%',
-              border: '1.5px solid rgba(29,29,31,0.3)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 700, color: 'rgba(29,29,31,0.5)',
-              cursor: 'help',
-            }}>?</div>
-            {showInfo && (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={handleClick}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '14px 20px',
+            background: isSelected ? 'var(--color-primary-bg)' : 'var(--color-bg-card)',
+            border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border-input)'}`,
+            borderRadius: 'var(--radius-input)',
+            cursor: 'pointer',
+            transition: 'border-color var(--transition-base), background var(--transition-base)',
+            userSelect: 'none',
+          }}
+          onMouseEnter={e => {
+            if (!isSelected)
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,0,0,0.25)';
+          }}
+          onMouseLeave={e => {
+            if (!isSelected)
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-input)';
+          }}
+        >
+          <span style={{ flex: 1, fontSize: 17, fontWeight: 500, letterSpacing: -0.2, color: 'var(--color-text-primary)', lineHeight: 1.3 }}>
+            {option.label}
+          </span>
+          {option.addon_info && (
+            <div
+              style={{ position: 'relative', flexShrink: 0 }}
+              onClick={e => { e.stopPropagation(); setShowInfo(v => !v); }}
+            >
               <div style={{
-                position: 'absolute', right: 0, bottom: 28, zIndex: 10,
-                background: '#fff', border: '1px solid rgba(29,29,31,0.12)',
-                borderRadius: 10, padding: '12px 14px', width: 260,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-                fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.5,
-              }}>
-                {option.addon_info}
-              </div>
-            )}
-          </div>
-        )}
+                width: 20, height: 20, borderRadius: '50%',
+                border: '1.5px solid rgba(29,29,31,0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 700, color: 'rgba(29,29,31,0.5)',
+                cursor: 'help',
+              }}>?</div>
+              {showInfo && (
+                <div style={{
+                  position: 'absolute', right: 0, bottom: 28, zIndex: 10,
+                  background: '#fff', border: '1px solid rgba(29,29,31,0.12)',
+                  borderRadius: 10, padding: '12px 14px', width: 260,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                  fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.5,
+                }}>
+                  {option.addon_info}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        {/* Linked add-ons — shown below this option when selected */}
+        {isSelected && linkedAddons.map(addon => (
+          <AddonCheckbox
+            key={addon.id}
+            option={addon}
+            checked={addonSelected.has(addon.value)}
+            onToggle={() => handleAddonToggle(addon.value)}
+            indent
+          />
+        ))}
       </div>
     );
   };
@@ -249,7 +295,7 @@ export default function QuestionRenderer({
   };
 
   // ── Addon checkbox (with optional info tooltip) ───────────────────────────────
-  const AddonCheckbox = ({ option, checked, onToggle }: { option: OptionWithDetails; checked: boolean; onToggle: () => void }) => {
+  const AddonCheckbox = ({ option, checked, onToggle, indent }: { option: OptionWithDetails; checked: boolean; onToggle: () => void; indent?: boolean }) => {
     const [showInfo, setShowInfo] = useState(false);
     return (
       <div
@@ -258,6 +304,7 @@ export default function QuestionRenderer({
           alignItems: 'center',
           gap: 12,
           padding: '11px 16px',
+          marginLeft: indent ? 16 : 0,
           background: checked ? 'rgba(83,74,183,0.06)' : 'rgba(29,29,31,0.03)',
           border: `1px solid ${checked ? 'var(--color-primary)' : 'var(--color-border-input)'}`,
           borderRadius: 10,
@@ -307,7 +354,8 @@ export default function QuestionRenderer({
     );
   };
 
-  const needsExplicitSubmit = question.type === 'numeric' || question.type === 'text' || question.type === 'multi_choice';
+  const choiceNeedsSubmit = (question.type === 'boolean' || question.type === 'choice') && hasLinkedAddons && pendingChoice != null;
+  const needsExplicitSubmit = question.type === 'numeric' || question.type === 'text' || question.type === 'multi_choice' || choiceNeedsSubmit;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -344,12 +392,12 @@ export default function QuestionRenderer({
               <OptionButton key={opt.id} option={opt} />
             ))}
           </div>
-          {addonOptions.length > 0 && (
+          {globalAddonOptions.length > 0 && (
             <div style={{ marginTop: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 8px' }}>
                 Extras opcionais
               </p>
-              {addonOptions.map(opt => (
+              {globalAddonOptions.map(opt => (
                 <AddonCheckbox
                   key={opt.id}
                   option={opt}
@@ -437,13 +485,21 @@ export default function QuestionRenderer({
           <button
             className="btn btn-primary"
             style={{ flex: 1, fontSize: 15 }}
-            onClick={
-              question.type === 'numeric' ? handleNumericSubmit
-              : question.type === 'multi_choice' ? handleMultiSubmit
-              : handleTextSubmit
-            }
+            onClick={() => {
+              if (choiceNeedsSubmit && pendingChoice) {
+                const selectedAddons = question.options.filter(o => o.is_addon && addonSelected.has(o.value));
+                onAnswerWithOption(pendingChoice, selectedAddons.length > 0 ? selectedAddons : undefined);
+              } else if (question.type === 'numeric') {
+                handleNumericSubmit();
+              } else if (question.type === 'multi_choice') {
+                handleMultiSubmit();
+              } else {
+                handleTextSubmit();
+              }
+            }}
             disabled={
-              question.type === 'numeric' ? !isNumericValid()
+              choiceNeedsSubmit ? false
+              : question.type === 'numeric' ? !isNumericValid()
               : question.type === 'multi_choice' ? multiSelected.size === 0
               : !textValue.trim()
             }
