@@ -169,17 +169,15 @@ function OptionRow({
             </div>
           </div>
 
-          {/* Addon info (shown only when is_addon) */}
-          {opt.is_addon && (
-            <div>
-              <label style={labelCss}>Texto do tooltip (informação do add-on)</label>
-              <textarea
-                style={{ ...inputCss, minHeight: 52, resize: 'vertical' }}
-                value={opt.addon_info}
-                onChange={e => onChange({ addon_info: e.target.value })}
-                placeholder="Ex: Caso a parede não esteja em condições de pintura direta, será necessário um barramento com custo acrescido." />
-            </div>
-          )}
+          {/* Tooltip info — available on all options */}
+          <div>
+            <label style={labelCss}>Texto do tooltip "?" (opcional)</label>
+            <textarea
+              style={{ ...inputCss, minHeight: 52, resize: 'vertical' }}
+              value={opt.addon_info}
+              onChange={e => onChange({ addon_info: e.target.value })}
+              placeholder="Ex: O preço de afagar inclui verniz/vitrificação." />
+          </div>
 
           {/* Separator */}
           <div style={{ borderTop: `1px solid ${C.border}` }} />

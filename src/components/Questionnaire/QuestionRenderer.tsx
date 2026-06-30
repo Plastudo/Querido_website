@@ -120,6 +120,7 @@ export default function QuestionRenderer({
   // ── Option button (single select: boolean + choice) ───────────────────────────
   const OptionButton = ({ option }: { option: OptionWithDetails }) => {
     const isSelected = savedAnswer === option.value;
+    const [showInfo, setShowInfo] = useState(false);
     return (
       <div
         role="button"
@@ -128,8 +129,8 @@ export default function QuestionRenderer({
         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onAnswerWithOption(option); }}
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: 3,
+          alignItems: 'center',
+          gap: 8,
           padding: '14px 20px',
           background: isSelected ? 'var(--color-primary-bg)' : 'var(--color-bg-card)',
           border: `1.5px solid ${isSelected ? 'var(--color-primary)' : 'var(--color-border-input)'}`,
@@ -147,52 +148,105 @@ export default function QuestionRenderer({
             (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-input)';
         }}
       >
-        <span style={{ fontSize: 17, fontWeight: 500, letterSpacing: -0.2, color: 'var(--color-text-primary)', lineHeight: 1.3 }}>
+        <span style={{ flex: 1, fontSize: 17, fontWeight: 500, letterSpacing: -0.2, color: 'var(--color-text-primary)', lineHeight: 1.3 }}>
           {option.label}
         </span>
+        {option.addon_info && (
+          <div
+            style={{ position: 'relative', flexShrink: 0 }}
+            onClick={e => { e.stopPropagation(); setShowInfo(v => !v); }}
+          >
+            <div style={{
+              width: 20, height: 20, borderRadius: '50%',
+              border: '1.5px solid rgba(29,29,31,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 700, color: 'rgba(29,29,31,0.5)',
+              cursor: 'help',
+            }}>?</div>
+            {showInfo && (
+              <div style={{
+                position: 'absolute', right: 0, bottom: 28, zIndex: 10,
+                background: '#fff', border: '1px solid rgba(29,29,31,0.12)',
+                borderRadius: 10, padding: '12px 14px', width: 260,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.5,
+              }}>
+                {option.addon_info}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };
 
   // ── Checkbox option (multi_choice) ────────────────────────────────────────────
-  const CheckboxOption = ({ option, checked, onToggle }: { option: OptionWithDetails; checked: boolean; onToggle: () => void }) => (
-    <div
-      role="checkbox"
-      aria-checked={checked}
-      tabIndex={0}
-      onClick={onToggle}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onToggle(); }}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        padding: '13px 18px',
-        background: checked ? 'var(--color-primary-bg)' : 'var(--color-bg-card)',
-        border: `1.5px solid ${checked ? 'var(--color-primary)' : 'var(--color-border-input)'}`,
-        borderRadius: 'var(--radius-input)',
-        cursor: 'pointer',
-        transition: 'border-color var(--transition-base), background var(--transition-base)',
-        userSelect: 'none',
-      }}
-    >
-      <div style={{
-        width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-        border: `2px solid ${checked ? 'var(--color-primary)' : 'var(--color-border-input)'}`,
-        background: checked ? 'var(--color-primary)' : 'transparent',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'all var(--transition-base)',
-      }}>
-        {checked && (
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+  const CheckboxOption = ({ option, checked, onToggle }: { option: OptionWithDetails; checked: boolean; onToggle: () => void }) => {
+    const [showInfo, setShowInfo] = useState(false);
+    return (
+      <div
+        role="checkbox"
+        aria-checked={checked}
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onToggle(); }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          padding: '13px 18px',
+          background: checked ? 'var(--color-primary-bg)' : 'var(--color-bg-card)',
+          border: `1.5px solid ${checked ? 'var(--color-primary)' : 'var(--color-border-input)'}`,
+          borderRadius: 'var(--radius-input)',
+          cursor: 'pointer',
+          transition: 'border-color var(--transition-base), background var(--transition-base)',
+          userSelect: 'none',
+        }}
+      >
+        <div style={{
+          width: 20, height: 20, borderRadius: 5, flexShrink: 0,
+          border: `2px solid ${checked ? 'var(--color-primary)' : 'var(--color-border-input)'}`,
+          background: checked ? 'var(--color-primary)' : 'transparent',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'all var(--transition-base)',
+        }}>
+          {checked && (
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+        <span style={{ flex: 1, fontSize: 16, fontWeight: 500, color: 'var(--color-text-primary)' }}>
+          {option.label}
+        </span>
+        {option.addon_info && (
+          <div
+            style={{ position: 'relative', flexShrink: 0 }}
+            onClick={e => { e.stopPropagation(); setShowInfo(v => !v); }}
+          >
+            <div style={{
+              width: 20, height: 20, borderRadius: '50%',
+              border: '1.5px solid rgba(29,29,31,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 700, color: 'rgba(29,29,31,0.5)',
+              cursor: 'help',
+            }}>?</div>
+            {showInfo && (
+              <div style={{
+                position: 'absolute', right: 0, bottom: 28, zIndex: 10,
+                background: '#fff', border: '1px solid rgba(29,29,31,0.12)',
+                borderRadius: 10, padding: '12px 14px', width: 260,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.5,
+              }}>
+                {option.addon_info}
+              </div>
+            )}
+          </div>
         )}
       </div>
-      <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--color-text-primary)' }}>
-        {option.label}
-      </span>
-    </div>
-  );
+    );
+  };
 
   // ── Addon checkbox (with optional info tooltip) ───────────────────────────────
   const AddonCheckbox = ({ option, checked, onToggle }: { option: OptionWithDetails; checked: boolean; onToggle: () => void }) => {
